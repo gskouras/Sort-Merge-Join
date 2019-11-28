@@ -22,7 +22,11 @@ int main()
     	datatable->num_relations++;
     	getline(&filename,&linesize,stdin);
   }
-  	printf("Current Data are %d", datatable->num_relations);
+
+   uint64_t element = datatable->table[1]->columns[2]->tuples[37].payload;
+   printf("The value of element is %ld\n",element);
+
+
 	return 0;
 }
 
@@ -31,6 +35,8 @@ relation_data *parsefile(char *filename)
 {
 	uint64_t numofTuples;
 	uint64_t numofColumns;
+	uint64_t num = 0;
+
 	FILE *fp = fopen(filename, "r");
 
 	if (fp == NULL)
@@ -51,11 +57,22 @@ relation_data *parsefile(char *filename)
     reldata->columns[i]->tuples = (tuple *)malloc(sizeof(tuple)*numofTuples);
     reldata->columns[i]->num_tuples = numofTuples;
 	}
+
   	reldata->numColumns = numofColumns;
 	printf("Has %ju colums\n\n",reldata->numColumns);
   	reldata->numTuples = numofTuples;
   	printf("Has %ju tuples\n\n",reldata->numTuples);
 
+  	for(int i=0;i<numofColumns;i++)
+  	{	
+    	for(int j=0;j<numofTuples;j++)
+    	{
+      		fread(&(num),sizeof(uint64_t),1,fp);
+      		reldata->columns[i]->tuples[j].payload=num;
+      		reldata->columns[i]->tuples[j].key = j;
+      	}
+    }
 
+    return reldata;
 }
 
