@@ -11,9 +11,11 @@
 #include <math.h>
 #include <dirent.h>
 #include "../HEADERS/relation.h"
+#include "../HEADERS/batch.h"
+#include "../HEADERS/predicates.h"
 
 
 
-relation_data *parsefile(char *filename);
+relation_data *read_file(char *filename);
 
 #endif
