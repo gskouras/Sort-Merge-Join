@@ -15,7 +15,8 @@
 #include "../HEADERS/predicates.h"
 
 
+relation_data *read_data_file(char *filename);
 
-relation_data *read_file(char *filename);
+
 
 #endif

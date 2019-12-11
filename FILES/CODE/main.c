@@ -6,36 +6,35 @@ int main()
   char *filename=NULL;
   size_t linesize;
 
+  Batch_lines bl;
+
   all_data *datatable =(all_data *)malloc(sizeof(all_data));
- 	datatable->num_relations=0;
+  datatable->num_relations=0;
   datatable->table=NULL;
  
 
-  printf("\nEnter the filenames which contains the relation. When you finish type: Done\n");
-  getline(&filename,&linesize,stdin);
+  // printf("\nEnter the filenames which contains the relation. When you finish type: Done\n");
+  // getline(&filename,&linesize,stdin);
 
-  while(strcmp(filename,"Done\n")!= 0)
-  {
-    datatable->table = realloc(datatable->table,sizeof(relation_data *)*(datatable->num_relations+1));
-    filename[strlen(filename)-1]='\0';
-    datatable->table[datatable->num_relations] = read_file(filename);
-    datatable->num_relations++;
-    getline(&filename,&linesize,stdin);
-  }
+  // while(strcmp(filename,"Done\n")!= 0)
+  // {
+  //   datatable->table = realloc(datatable->table,sizeof(relation_data *)*(datatable->num_relations+1));
+  //   filename[strlen(filename)-1]='\0';
+  //   datatable->table[datatable->num_relations] = read_data_file(filename);
+  //   datatable->num_relations++;
+  //   getline(&filename,&linesize,stdin);
+  // }
 
-  // uint64_t element = datatable->table[1]->columns[2]->tuples[37].payload;
-  // printf("The value of element is %ld\n",element);
+  //uint64_t element = datatable->table[1]->columns[2]->tuples[37].payload;
+  //printf("The value of element is %ld\n",element);
+  
+ 	execute_all_batches("small.work", datatable);
 
- 	printf("Now please enter a batch of queries to exexute. When the batch is over press F\n");
- 	while (getline(&filename, &linesize, stdin))
- 	{
-
- 	}
 	return 0;
 }
 
 
-relation_data *read_file(char *filename)
+relation_data *read_data_file(char *filename)
 {
 	uint64_t numofTuples;
 	uint64_t numofColumns;
@@ -80,4 +79,5 @@ relation_data *read_file(char *filename)
 
   return reldata;
 }
+
 

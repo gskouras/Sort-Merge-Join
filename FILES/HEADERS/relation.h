@@ -1,3 +1,8 @@
+#ifndef _RELATION_H_
+#define _RELATION_H_
+
+
+
 #include "../HEADERS/tuple.h"
 
 
@@ -42,3 +47,6 @@ int relation_checkifsorted ( relation *  ) ;
 void relation_print ( relation * ) ;
 
 void relation_free ( relation * ) ;
+
+
+#endif

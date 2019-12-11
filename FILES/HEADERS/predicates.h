@@ -6,25 +6,25 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-typedef struct predicates{      /* struct predicates stores info for predicate in query*/
-  int rel1;             /* index of 1st relation in predicate*/
-  int col1;             /* index of column of 1st relation in predicate*/
-  int rel2;             /* index of 2nd relation in predicate*/
-  int col2;             /* index of column of 2nd relation in predicate*/
-  char op;           /* operation between the 2 columns */
-} predicates;
 
+typedef struct 
+{	
+	int flag_exec; //flag to check if this predicate has been executed
+	int rel1_alias; 
+	int rel1_origin;
+	int rel1_col;
+	int rel2_alias;//an einai filtro to arxikopoio me -1
+	int rel2_origin;
+	int rel2_col;
+	char op; // operation between the 2 columns
+	uint64_t filter_value;
+} Predicate;
 
-int calc_predicates_num(char *); //calculating the number of predicates in a given query;
-
-
-predicates **fill_predicates(char * , int);
-
-
-void print_predicates (predicates ** predicates, int num_predicates); //print the predicates of a query
-
-
-
+typedef struct 
+{
+	Predicate *predicates_array;
+	int size;
+} Predicates;
 
 
 
