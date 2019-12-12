@@ -27,7 +27,7 @@ void fillBatches(Batches *batches, char *s, char *filename){
   int count, n, i, k;
   char *line = NULL;
   size_t len = 0;
-    ssize_t read;
+  ssize_t read;
   char * token = strtok(s, "_");
   count = atoi(token);
   FILE *fp = fopen(filename, "r");
@@ -51,7 +51,6 @@ void fillBatches(Batches *batches, char *s, char *filename){
     count = atoi(token);
   }
 
-
   fclose(fp);
 
   if (line)
@@ -72,7 +71,7 @@ void execute_all_batches(char *filename, all_data *datatable)
   {
     execute_batch(&batches->batches[i], datatable);
   }
-  
+
 	free_all_batches(batches);
   	return;
 }
@@ -82,7 +81,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 
 void execute_batch(Batch_lines * bl, all_data * datatable )
 {
-	for (int i = 0; i < bl->size; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		execute_query(bl->batch[i], datatable);
 	}
@@ -118,7 +117,9 @@ void execute_query(char * query, all_data *datatable)
 
   fill_relations(rel_str, alias_array);
 	fill_predicates(pred_str, &predicates, alias_array);
+  //fill_checksums(check_sums_str, alias_array);
 
+  execute_filters(&predicates, datatable);
 
 }
 
@@ -136,7 +137,7 @@ void fill_relations(char *rel_str, int *alias_array)
   {
     alias_array[i] = atoi(token);
     token = strtok(NULL, " ");
-    printf("Allias_array [%d] is %d\t", i, alias_array[i]);
+    //printf("Allias_array [%d] is %d\t", i, alias_array[i]);
     i++;
   }
 
@@ -161,14 +162,14 @@ void fill_predicates(char *pred_str, Predicates *pd, int *alias_array)
 		pd->predicates_array[i].flag_exec = 0;
 
 		pd->predicates_array[i].rel1_alias = atoi(token);
-    printf("\npd.predicates_array[%d].rel1_alias is %d\n", i, pd->predicates_array[i].rel1_alias);
+    //printf("\npd.predicates_array[%d].rel1_alias is %d\n", i, pd->predicates_array[i].rel1_alias);
 
 		pd->predicates_array[i].rel1_origin = alias_array[pd->predicates_array[i].rel1_alias];
-    printf("pd.predicates_array[%d].rel1_origin is %d\n", i,  pd->predicates_array[i].rel1_origin);
+    //printf("pd.predicates_array[%d].rel1_origin is %d\n", i,  pd->predicates_array[i].rel1_origin);
 
 		token = strtok(NULL, "=><");
 		pd->predicates_array[i].rel1_col = atoi(token);
-    printf("pd.predicates_array[%d].rel1_col is %d\n", i,  pd->predicates_array[i].rel1_col);
+    //printf("pd.predicates_array[%d].rel1_col is %d\n", i,  pd->predicates_array[i].rel1_col);
 
 		token = strtok(NULL, ".&");
 
@@ -176,21 +177,21 @@ void fill_predicates(char *pred_str, Predicates *pd, int *alias_array)
 		{
 			pd->predicates_array[i].rel2_alias = -1;
 			pd->predicates_array[i].filter_value = atoi(token);// na do  atoi gia unsinged int;
-      printf("pd.predicates_array[%d].filter_value is %ld\n", i,  pd->predicates_array[i].filter_value);
+     // printf("pd.predicates_array[%d].filter_value is %ld\n", i,  pd->predicates_array[i].filter_value);
 		}
 		else
 		{
 			pd->predicates_array[i].rel2_alias = atoi(token);
-      printf("pd.predicates_array[%d].rel2_alias is %d\n", i,  pd->predicates_array[i].rel2_alias);
+      //printf("pd.predicates_array[%d].rel2_alias is %d\n", i,  pd->predicates_array[i].rel2_alias);
 
 			pd->predicates_array[i].rel2_origin = alias_array[pd->predicates_array[i].rel2_alias];
-      printf("pd.predicates_array[%d].rel2_origin is %d\n", i,  pd->predicates_array[i].rel2_origin);
+      //printf("pd.predicates_array[%d].rel2_origin is %d\n", i,  pd->predicates_array[i].rel2_origin);
 
 			token = strtok(NULL, "&");
 			pd->predicates_array[i].rel2_col = atoi(token);
-      printf("pd.predicates_array[%d].rel2_col is %d\n", i,  pd->predicates_array[i].rel2_col);
+      //printf("pd.predicates_array[%d].rel2_col is %d\n", i,  pd->predicates_array[i].rel2_col);
 		}
-    printf("pd.predicates_array[%d].op is %c\n\n", i,  pd->predicates_array[i].op);
+    //printf("pd.predicates_array[%d].op is %c\n\n", i,  pd->predicates_array[i].op);
 		token = strtok(NULL, ".\n");
 	}
 }

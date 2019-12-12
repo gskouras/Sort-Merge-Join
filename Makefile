@@ -1,5 +1,5 @@
-all: main.o tuple.o relation.o predicates.o batch.o
-	gcc -o EXEC/sort_join main.o tuple.o relation.o predicates.o batch.o -lm -g
+all: main.o tuple.o relation.o predicates.o batch.o inbetween.o
+	gcc -o EXEC/sort_join main.o tuple.o relation.o predicates.o batch.o inbetween.o -lm -g
 
 main.o: FILES/CODE/main.c 
 	gcc -c  FILES/CODE/main.c
@@ -15,6 +15,9 @@ predicates.o: FILES/CODE/predicates.c
 
 batch.o: FILES/CODE/batch.c
 	gcc -c FILES/CODE/batch.c
+
+inbetween.o: FILES/CODE/inbetween.c
+	gcc -c FILES/CODE/inbetween.c
 
 
 clean:

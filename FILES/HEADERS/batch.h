@@ -9,6 +9,8 @@
 #include <strings.h>
 #include "../HEADERS/predicates.h"
 #include "../HEADERS/relation.h"
+#include "../HEADERS/inbetween.h"
+
 
 
 
@@ -26,23 +28,7 @@ typedef struct
 } Batches;
 
 
-typedef struct 
-{
-	relation * rel;
-	int rel1_alias; 
-	int rel1_origin;
-	int rel1_col;
-	int rel2_alias;
-	int rel2_origin;
-	int rel2_col;
-} Unique_res;
 
-typedef struct 
-{
-	Unique_res * Inter_results;
-	int size;
-	int current;
-} Inter_results;
 
 void fillBatches(Batches *batches, char *s, char *filename);
 
