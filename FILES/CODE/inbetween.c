@@ -10,7 +10,7 @@ void execute_filters(Predicates *pd, all_data *dt)
 		{
 			if(pd->predicates_array[i].op == '>')
 			{
-				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->numTuples; j++)
+				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->num_tuples; j++)
 				{
 					if(dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload > 
 					pd->predicates_array[i].filter_value)
@@ -22,7 +22,7 @@ void execute_filters(Predicates *pd, all_data *dt)
 				printf("Total tuples where %d\n", count);
 			}else if(pd->predicates_array[i].op == '<')
 			{
-				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->numTuples; j++)
+				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->num_tuples; j++)
 				{
 					if(dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload < 
 					pd->predicates_array[i].filter_value)
@@ -36,7 +36,7 @@ void execute_filters(Predicates *pd, all_data *dt)
 			}
 			else if(pd->predicates_array[i].op == '=')
 			{
-				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->numTuples; j++)
+				for(int j = 0; j < dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->num_tuples; j++)
 				{
 					if(dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload ==
 					pd->predicates_array[i].filter_value)
