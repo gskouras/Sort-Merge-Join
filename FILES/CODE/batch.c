@@ -1,6 +1,7 @@
 #include "../HEADERS/batch.h"
 
-Batches * createBatches(char *filename, char *s){
+Batches * createBatches(char *filename, char *s)
+{
   int count1 = 0, count2 = 0, c;
   memset(s,0,sizeof(s));
   FILE *fp = fopen(filename, "r");
@@ -23,7 +24,8 @@ Batches * createBatches(char *filename, char *s){
     return batches;
 }
 
-void fillBatches(Batches *batches, char *s, char *filename){
+void fillBatches(Batches *batches, char *s, char *filename)
+{
   int count, n, i, k;
   char *line = NULL;
   size_t len = 0;
@@ -95,8 +97,10 @@ void execute_query(char * query, all_data *datatable)
 	char check_sums_str[50];
 
 	int *alias_array = NULL;
-	int num_of_rel, num_of_pred; 
+	int num_of_rel, num_of_pred, num_of_check_sums;
 	Predicates predicates;
+  Check_sums check_sums;
+  Inbetween_results inbet_res;
 
 	char *token;
 	token = strtok(query, "|");
@@ -108,18 +112,25 @@ void execute_query(char * query, all_data *datatable)
 	token = strtok(NULL, "\n");
 	strcpy(check_sums_str, token);
 
-	num_of_rel = find_num_of_relations(rel_str);
-	alias_array = (int *)malloc(sizeof(int) * num_of_rel);
+	num_of_rel = find_num_of_relations(rel_str); //find number of relations for current query;
+	alias_array = (int *)malloc(sizeof(int) * num_of_rel); //give space to save the relations
 
-	num_of_pred = find_num_of_predicates(pred_str);
-	predicates.predicates_array = malloc(sizeof(Predicate) * num_of_pred);
+  fill_relations(rel_str, alias_array); //fill array of relations
+
+	num_of_pred = find_num_of_predicates(pred_str); //calculating number of predicates for current query
+	predicates.predicates_array = malloc(sizeof(Predicate) * num_of_pred); 
 	predicates.size = num_of_pred;
 
-  fill_relations(rel_str, alias_array);
-	fill_predicates(pred_str, &predicates, alias_array);
-  //fill_checksums(check_sums_str, alias_array);
+	fill_predicates(pred_str, &predicates, alias_array);//fill table of predicates
 
-  execute_filters(&predicates, datatable);
+  num_of_check_sums = find_num_of_relations(check_sums_str);
+  check_sums.check_sums_array = malloc(sizeof(Check_sum) * num_of_check_sums);
+  check_sums.size = num_of_check_sums;
+
+  printf("Check sums str is %s\n",check_sums_str);
+  fill_check_sums(check_sums_str, &check_sums, alias_array);
+
+  //execute_filters(&predicates, datatable);
 
 }
 
@@ -195,6 +206,31 @@ void fill_predicates(char *pred_str, Predicates *pd, int *alias_array)
 		token = strtok(NULL, ".\n");
 	}
 }
+
+void fill_check_sums(char* check_sums_str, Check_sums *cs, int *alias_array)
+{
+  char *token;
+  size_t len = strlen(check_sums_str);
+  char localstr[len+1];
+  strcpy(localstr, check_sums_str);
+  token = strtok(localstr, ".");
+
+  for (int i = 0; i < cs->size; ++i)
+  {
+    cs->check_sums_array[i].rel_alias = atoi(token);
+    //printf("check_sums[%d] rel_alias is %d\t", i, cs->check_sums_array[i].rel_alias);
+
+    cs->check_sums_array[i].rel_origin = alias_array[cs->check_sums_array[i].rel_alias];
+    //printf("check_sums[%d] rel_origin is %d\t", i, cs->check_sums_array[i].rel_origin);
+    token = strtok(NULL, " ");
+
+    cs->check_sums_array[i].rel_col = atoi(token);
+    //printf("check_sums[%d] coloumn is %d\n", i, cs->check_sums_array[i].rel_col);
+
+    token = strtok(NULL, ". ");
+   }
+}
+
 
 int isnumber(char * number)
 {
