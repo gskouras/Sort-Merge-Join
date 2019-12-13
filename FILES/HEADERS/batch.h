@@ -7,8 +7,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <strings.h>
-//#include "../HEADERS/relation.h"
-#include "../HEADERS/inbetween.h"
+#include "../HEADERS/relation.h"
 
 
 typedef struct
@@ -84,7 +83,7 @@ void fill_check_sums(char *check_sum_str, Check_sums *cs, int * alias_array);///
 
 int isnumber(char * number); //checking if a given string is number
 
-void execute_filters(Predicates * pd, all_data * datatable);
+
 
 
 

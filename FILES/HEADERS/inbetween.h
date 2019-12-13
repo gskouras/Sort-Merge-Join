@@ -8,24 +8,33 @@
 #include <strings.h>
 #include "../HEADERS/relation.h"
 #include "../HEADERS/batch.h"
+#include "../HEADERS/sort_join.h"
 
 
 typedef struct 
 {
-	relation * rel1; 
+	relation * rel; 
 	int rel1_origin;
+	int rel1_alias;
 	int rel1_col;
 	int rel2_origin;
+	int rel2_alias;
 	int rel2_col;
-} Inter_result;
+} Inbet_result;
 
 typedef struct 
 {
-	Inter_result * inter_res_array;
+	Inbet_result * inbet_res_array;
 	int size;
 	int current;
 } Inbetween_results;
 
+
+void execute_predicates(Predicates *pd, all_data *dt);
+
+int calc_tuples_size_after_filter(Predicates *pd, all_data *dt);
+
+relation * execute_filters(Predicates * pd, all_data * dt, relation* updated_rel, int num_of_tuples);
 
 
 

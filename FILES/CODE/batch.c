@@ -1,4 +1,5 @@
 #include "../HEADERS/batch.h"
+#include "../HEADERS/inbetween.h"
 
 Batches * createBatches(char *filename, char *s)
 {
@@ -91,7 +92,7 @@ void execute_batch(Batch_lines * bl, all_data * datatable )
 
 void execute_query(char * query, all_data *datatable)
 {
-  printf(" char query is %s\n",query );
+  printf("Query is %s\n",query );
 	char rel_str[50]; 
 	char pred_str[200];
 	char check_sums_str[50];
@@ -100,7 +101,6 @@ void execute_query(char * query, all_data *datatable)
 	int num_of_rel, num_of_pred, num_of_check_sums;
 	Predicates predicates;
   Check_sums check_sums;
-  Inbetween_results inbet_res;
 
 	char *token;
 	token = strtok(query, "|");
@@ -128,9 +128,9 @@ void execute_query(char * query, all_data *datatable)
   check_sums.size = num_of_check_sums;
 
 
-  fill_check_sums(check_sums_str, &check_sums, alias_array);
+  fill_check_sums(check_sums_str, &check_sums, alias_array);//fill table of check_sums
 
-  execute_filters(&predicates, datatable);
+  execute_predicates(&predicates, datatable);
 
 }
 
