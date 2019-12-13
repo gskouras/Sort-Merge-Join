@@ -30,25 +30,6 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 int calc_tuples_size_after_filter(Predicates *pd, all_data *dt)
 {	
 
@@ -110,7 +91,7 @@ relation *execute_filters(Predicates *pd, all_data *dt, relation* updated_rel, i
 					pd->predicates_array[i].filter_value)
 					{	
 						//printf("position is %d\t", position);
-						updated_rel->tuples[updated_rel->num_tuples].key = updated_rel->num_tuples;
+						updated_rel->tuples[updated_rel->num_tuples].key = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].key;
 						updated_rel->tuples[updated_rel->num_tuples++].payload = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload;
 					}
 				}
@@ -121,7 +102,7 @@ relation *execute_filters(Predicates *pd, all_data *dt, relation* updated_rel, i
 					if(dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload < 
 					pd->predicates_array[i].filter_value)
 					{	
-						updated_rel->tuples[updated_rel->num_tuples].key = updated_rel->num_tuples;
+						updated_rel->tuples[updated_rel->num_tuples].key = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].key;
 						updated_rel->tuples[updated_rel->num_tuples++].payload = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload;
 					}
 
@@ -134,7 +115,7 @@ relation *execute_filters(Predicates *pd, all_data *dt, relation* updated_rel, i
 					if(dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload ==
 					pd->predicates_array[i].filter_value)
 					{
-						updated_rel->tuples[updated_rel->num_tuples].key = updated_rel->num_tuples;
+						updated_rel->tuples[updated_rel->num_tuples].key = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].key;
 						updated_rel->tuples[updated_rel->num_tuples++].payload = dt->table[pd->predicates_array[i].rel1_origin]->columns[pd->predicates_array[i].rel1_col]->tuples[j].payload;
 					}
 				}	
