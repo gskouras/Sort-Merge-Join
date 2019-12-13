@@ -1,8 +1,6 @@
 #ifndef _RELATION_H_
 #define _RELATION_H_
 
-
-
 #include "../HEADERS/tuple.h"
 
 

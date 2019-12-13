@@ -1,7 +1,6 @@
 #include "../HEADERS/inbetween.h"
 
 void execute_filters(Predicates *pd, all_data *dt)
-
 {
 	int count = 0;
 	for (int i = 0; i < pd->size; ++i)
