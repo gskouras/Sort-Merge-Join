@@ -127,10 +127,10 @@ void execute_query(char * query, all_data *datatable)
   check_sums.check_sums_array = malloc(sizeof(Check_sum) * num_of_check_sums);
   check_sums.size = num_of_check_sums;
 
-  printf("Check sums str is %s\n",check_sums_str);
+
   fill_check_sums(check_sums_str, &check_sums, alias_array);
 
-  //execute_filters(&predicates, datatable);
+  execute_filters(&predicates, datatable);
 
 }
 
