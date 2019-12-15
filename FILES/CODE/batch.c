@@ -84,7 +84,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 
 void execute_batch(Batch_lines * bl, all_data * datatable )
 {
-	for (int i = 0; i < bl->size; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		execute_query(bl->batch[i], datatable);
 	}
@@ -92,7 +92,7 @@ void execute_batch(Batch_lines * bl, all_data * datatable )
 
 void execute_query(char * query, all_data *datatable)
 {
-  printf("Query is %s\n",query );
+    //printf("Query is %s\n",query );
 	char rel_str[50]; 
 	char pred_str[200];
 	char check_sums_str[50];

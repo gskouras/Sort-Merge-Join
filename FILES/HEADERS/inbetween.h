@@ -10,34 +10,51 @@
 #include "../HEADERS/batch.h"
 #include "../HEADERS/sort_join.h"
 
+///////////
+//STRUCTS//
+///////////
 
-typedef struct 
-{
-	relation * rel; 
-	int rel1_origin;
-	int rel1_alias;
-	int rel1_col;
-	int rel2_origin;
-	int rel2_alias;
-	int rel2_col;
-} Inbet_result;
+typedef struct {
+	int **farrays;
+	int **jarrays;
+} Between;
 
-typedef struct 
-{
-	Inbet_result * inbet_res_array;
-	int size;
-	int current;
-} Inbetween_results;
-
+//////////////
+//ESSENTIALS//
+//////////////
 
 void execute_predicates(Predicates *pd, all_data *dt);
 
-int calc_tuples_size_after_filter(Predicates *pd, all_data *dt);
+int *execute_filter( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
 
-relation * execute_filters(Predicates * pd, all_data * dt, relation* updated_rel, int num_of_tuples);
+int check_if_filtered ( int * , int , int );
 
 
+///////////
+//FILTERS//
+///////////
 
+int *greater_filter ( all_data * , int * , Predicate *);
+
+int *lesser_filter ( all_data * , int * , Predicate *);
+
+int *equal_filter ( all_data * , int * , Predicate *);
+
+////////////////
+//CONSTRUCTORS//
+////////////////
+
+Between *create_between ( Between *); //Allocate memory for our between struct
+
+Between *create_arrays ( Between * , int ) ; //Allocate memory for the filtered and the joined arrays we are going to create
+
+//////////
+//OTHERS//
+//////////
+
+int calculate_relations ( Predicates * ); //return how many relations we are going to use
+
+int in_used_relation ( int * , int , int ); //Check if already used
 
 
 

@@ -23,12 +23,17 @@ typedef struct all_data{
 } all_data;;
 
 
+relation_data *relation_data_create ( relation_data * );
+
+relation_data *relation_data_create_relations ( relation_data * , uint64_t , uint64_t );
+
 
 relation * relation_create ( relation * /*relation to be created*/ ) ;
 
 relation * relation_createtuples ( relation * , int /*tota tuples of relation*/) ;
 
 
+relation_data *relation_copy ( relation_data * , relation_data * ); 
 
 void relation_setkey ( relation * , int  /*position of tuple that we want to set*/ , uint64_t /*key we want to set*/ ) ;
 
