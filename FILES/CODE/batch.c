@@ -93,6 +93,8 @@ void execute_batch(Batch_lines * bl, all_data * datatable )
 void execute_query(char * query, all_data *datatable)
 {
 
+    //printf("Query is %s\n",query );
+
 	char rel_str[50]; 
 	char pred_str[200];
 	char check_sums_str[50];
