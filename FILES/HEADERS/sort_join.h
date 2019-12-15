@@ -36,7 +36,7 @@ void print_array ( int ** /*array*/ , int /*size of array*/ ) ;
 
 //Returns i significant byte of the key
 
-unsigned long long get_sigbyte ( unsigned long long , int ) ;
+uint64_t get_sigbyte ( uint64_t, int ) ;
 
 //Returns requiered size for the psum
 
@@ -61,6 +61,11 @@ int partition ( relation * , int  , int  ) ;
 //Swap tuples in a relationship of the given position
 
 void swap_rel_tuples ( relation * , int , int ) ;
+
+
+relation *join(relation *rel_left, relation *rel_right);
+
+
 
 
 #endif

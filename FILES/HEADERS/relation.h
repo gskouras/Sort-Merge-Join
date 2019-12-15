@@ -42,9 +42,12 @@ int relation_getnumtuples ( relation * ) ;
 
 int relation_checkifsorted ( relation *  ) ;
 
+int isEqual(relation *rel_left, relation *rel_right, int i, int k);
+
 void relation_print ( relation * ) ;
 
 void relation_free ( relation * ) ;
+
 
 
 #endif

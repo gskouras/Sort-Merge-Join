@@ -38,7 +38,6 @@ int main()
   //printf("The value of element is %ld\n",element);
   
  	execute_all_batches("small.work", datatable);
-
 	return 0;
 }
 

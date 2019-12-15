@@ -66,11 +66,16 @@ int relation_checkifsorted ( relation * this ) {
 
 void relation_print ( relation *rel ) {
 
-	for (int i = 0; i < rel->num_tuples ; i++ ) {
+	for (int i = 0; i < 50 ; i++ ) {
 		printf ( "KEY IS %ld PAYLOAD IS %ld \n" , relation_getkey ( rel , i ) , relation_getpayload ( rel , i ) ) ;
 	}
 }
 
 void relation_free ( relation *rel ) {
 	free (rel->tuples);
+}
+
+int isEqual(relation *rel_left, relation *rel_right, int i, int k)
+{
+	return rel_left->tuples[i].payload == rel_right->tuples[k].payload;
 }
