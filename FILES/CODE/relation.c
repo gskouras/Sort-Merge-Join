@@ -3,6 +3,22 @@
 #include <stdlib.h>
 #include "../HEADERS/relation.h"
 
+relation_data *relation_data_create ( relation_data *this ) {
+	this = malloc ( sizeof ( relation_data ) ) ;
+	return this;
+}
+
+relation_data *relation_data_create_relations ( relation_data *this , uint64_t total_columns , uint64_t total_tuples ) {
+	this->numColumns = total_columns;
+	this->columns = malloc ( total_columns * sizeof ( relation * ) );
+	for ( int i = 0 ; i < total_columns ; i++ ) {
+		this->columns[i] = relation_create ( this->columns[i] );
+		this->columns[i] = relation_createtuples ( this->columns[i] , total_tuples );
+	}
+	return this;
+}
+
+
 
 relation * relation_create ( relation *this ) {
 	this = malloc ( sizeof ( relation ) ) ;
@@ -18,6 +34,15 @@ relation * relation_createtuples ( relation *this , int num /* number of tuples 
 	return this;
 }
 
+relation_data *relation_copy ( relation_data *original , relation_data *copy ) {
+	uint64_t total_columns = original->numColumns;
+	uint64_t total_tuples = original->numTuples;
+
+	printf("TOTAL COLUMNS ARE %ld and total_tuples ARE %ld\n",total_columns,total_tuples);
+	copy = relation_data_create( copy );
+	copy = relation_data_create_relations ( copy , total_columns , total_tuples );
+	return copy;
+}
 
 void relation_setkey( relation *this , int tup /*position of tuple that we want to set*/ , uint64_t key /*key we want to set*/ ) {
 	
