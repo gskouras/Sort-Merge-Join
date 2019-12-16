@@ -46,7 +46,7 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 	int not_used;
 
 	//Then execute joins
-	for (int i = 0 ; i < 2; i++) {
+	for (int i = 0 ; i < 1; i++) {
 		temp_pred = &pd->predicates_array[i]; 
 
 		if ( temp_pred->rel2_alias != -1 ) {//This means that we have a join predicate 
@@ -75,69 +75,137 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 
 	int rel1_no = temp_pred->rel1_origin;
 	int rel2_no = temp_pred->rel1_origin;
+	int rel1_col = temp_pred->rel1_col;
+	int rel2_col = temp_pred->rel2_col;
+	int left, right;
 
 	relation *cur1_rel;
 	relation *cur2_rel;
 	relation *result; //Store the result of the jkoin of each case
 
-	if ( (flags[0] == 0 || flags[0] == 1) &&  (flags[1] == 0 || flags[1] == 1) ) { //This means that none of the relations has been joined
-		if ( flags[0] == 0 && flags[1] == 0 ) { // CASE 1 : This means that none of the relations has been filtered;
+	if ( (flags[0] == 0 || flags[0] == 1) &&  (flags[1] == 0 || flags[1] == 1) ) //This means that none of the relations has been joined
+	{ //This means that none of the relations has been joined
+		if ( flags[0] == 0 && flags[1] == 0 ) // CASE 1 : This means that none of the relations has been filtered;
+		{ 
 			//SORTJOIN//
-			//EXMP result = join(rel1 ,rel2 )
+			left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
+			right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
+			bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
+			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
+			result = join(dt->table[rel1_no]->columns[rel1_col] ,dt->table[rel2_no]->columns[rel2_col] );
 			//FREE//
 		}
-		else if ( flags[0] == 1 ) { // CASE 2 : This means that the left rel was filtered
+		else if ( flags[0] == 1 ) // CASE 2 : This means that the left rel was filtered
+		{ 
 			//BUILD RELATION FOR LEFT REL//
-			//EXMP cur1_rel = build_Relation ( farrays[rel1_no] );
-			//EXMP result = join ( cur1_rel , rel2 );
+			cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+			left = relation_getnumtuples( cur1_rel); //total tuples in left relation
+			right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
 			//SORTJOIN//
+			bucket_sort(cur1_rel, 0, left-1, 1);
+			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
+		 	result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
 			//FREE//
 		}
-		else if ( flags[1] == 1 ) { // CASE 3 : This means that the right rel was filtered
+		else if ( flags[1] == 1 ) // CASE 3 : This means that the right rel was filtered
+		{ 
 			//BUILD RELATION FOR RIGHT REL//
+			cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 			//SORTJOIN//
+			left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
+			right = relation_getnumtuples( cur2_rel); //total tuples in right relation
+			//SORTJOIN//
+			bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
+			bucket_sort(cur2_rel, 0, right-1, 1);
+		 	result = join ( dt->table[rel1_no]->columns[rel1_col] , cur2_rel );
 			//FREE//
 		}
-		else { // CASE 4 : This means that both rels are filtered
-			//BUILD RELATION FOR LEFT REL//
+		else // CASE 4 : This means that both rels are filtered
+		{	//BUILD RELATION FOR LEFT REL//
+			cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 			//BUILD RELATION FOR RIGHT REL//
+			cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 			//SORTJOIN//
+			left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
+			right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
+			bucket_sort(cur1_rel, 0, left-1, 1 );
+			bucket_sort(cur2_rel, 0, right-1, 1 );
+			result = join ( cur1_rel , cur2_rel );
 			//FREE//
 		}
 	}
-	else { //This means that one of the relations has been joined
-		if ( flags[0] == 2 && flags[1] != 2) { // If left rel is arledy joined and right isnt
-			if (flags[1] == 0 ) { // CASE 5 : This means that right isnt filetered or joined
+	else //This means that one of the relations has been joined
+	{ 
+		if ( flags[0] == 2 && flags[1] != 2) // If left rel is arledy joined and right isnt
+		{ 
+			if (flags[1] == 0 ) // CASE 5 : This means that right isnt filetered or joined
+			{ 
 				//BUILD RELATION FOR LEFT REL//
+				cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				//SORT JOIN//
+				left = relation_getnumtuples( cur1_rel); //total tuples in left relation
+				right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
+				//SORTJOIN//
+				bucket_sort(cur1_rel, 0, left-1, 1);
+				bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
+		 		result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
 				//FREE//
 			}
-			else { // CASE 6 : This means that right was filterd but not joined yet
-				//BUILD RELATION FOR LEFT REL FROM JARRAYS//
-				//BUILD RELATION FOR RIGHT REL FROM FARRAYS//
+			else // CASE 6 : This means that right was filterd but not joined yet
+			{ 
+				// //BUILD RELATION FOR LEFT REL FROM JARRAYS//
+				 cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				// //BUILD RELATION FOR RIGHT REL FROM FARRAYS//
+				 cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				// //SORTJOIN//
+				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
+				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
+				 bucket_sort(cur1_rel, 0, left-1, 1 );
+				 bucket_sort(cur2_rel, 0, right-1, 1 );
+				 result = join ( cur1_rel , cur2_rel );
 				//FREE//
 			}
 		}
-		else if ( flags[1] == 2 && flags[0] != 2 ) { // Esle If right rel is arledy joined and left isnt
-			if (flags[0] == 0 ) { // CASE 7 : This means that left isnt filetered or joined
-				//BUILD RELATION FOR RIGHT REL//
-				//SORT JOIN//
+		else if ( flags[1] == 2 && flags[0] != 2 ) // Esle If right rel is arledy joined and left isnt
+		{ 
+			if (flags[0] == 0 ) // CASE 7 : This means that left isnt filetered or joined
+			{ 
+				// //BUILD RELATION FOR RIGHT REL//
+				 cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				// //SORTJOIN//
+				 left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
+				 right = relation_getnumtuples( cur2_rel); //total tuples in right relation
+				// //SORTJOIN//
+				 bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
+				 bucket_sort(cur2_rel, 0, right-1, 1);
+		 	 	result = join ( dt->table[rel1_no]->columns[rel1_col] , cur2_rel );
 				//FREE//
 			}
-			else { // CASE 8 : This means that left was filterd but not joined yet
-				//BUILD RELATION FOR RIGHT REL FROM JARRAYS//
-				//BUILD RELATION FOR LEFT REL FROM FARRAYS//
+			else  // CASE 8 : This means that left was filterd but not joined yet
+			{
+				// //BUILD RELATION FOR LEFT REL FROM FARRAYS//
+				 cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				// //BUILD RELATION FOR RIGHT REL FROM JARRAYS//
+				 cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				// //SORTJOIN//
+				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
+				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
+				 bucket_sort(cur1_rel, 0, left-1, 1 );
+				 bucket_sort(cur2_rel, 0, right-1, 1 );
+				 result = join ( cur1_rel , cur2_rel );
 				//FREE//
 			}
+
 		}
-		else{ //CASE 9 : This means both HAve already joined
+		else //CASE 9 : This means both HAve already joined
+		{ 
 			//FILTER CASE//
 			//FREE//
 		}
 	}
 
 
-	return this;
+	return b;
 }
 
 int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , int *result ) 
@@ -352,42 +420,47 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 }
 
 
-relation * build_relation(int * farray, all_data *dt, int rel_no , int col_no )
+relation * build_relation(int * array, all_data *dt, int rel_no , int col_no )
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
 	int count= 0;
-	int num_of_tuples = calc_tuples_size_to_build_rel(farray, dt, rel_no , col_no );
+
+	
+	int num_of_tuples = calc_tuples_size_to_build_rel(array, dt, rel_no , col_no );
 
 	relation *updated_rel = malloc(sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
+	
 
 	for (int i = 0; i < size ; i++)
 	{
-		if( farray[i] != -1)
+		if( array[i] != -1)
 		{	
-			//printf("i is %d\n", i);
-			updated_rel->tuples[count].key = farray[i];
+			updated_rel->tuples[count].key = array[i];
 			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
 			count++;
+
 		}
 	}
+	//relation_print(updated_rel);
 	return updated_rel;
 }
 	
 
 
-int calc_tuples_size_to_build_rel(int * farray, all_data *dt, int rel_no , int col_no) 
+int calc_tuples_size_to_build_rel(int *array, all_data *dt, int rel_no , int col_no) 
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
 	int count = 0;
-	// printf("size is %ld \n", size);
-	// printf("The relation has been filtered is r%d col%d\n",rel_no, col_no );
+	printf("size is %ld \n", size);
+	printf("The relation has been filtered is r%d col%d\n",rel_no, col_no );
 
 	for (int i = 0; i < size ; ++i)
 	{
-		if(farray[i] != -1)
+		if(array[i] != -1)
 		{
+
 			count++;
 		}
 	}

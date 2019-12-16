@@ -65,7 +65,7 @@ void swap_rel_tuples ( relation * , int , int ) ;
 
 relation *join(relation *rel_left, relation *rel_right);
 
-
+int calc_tuples_size_after_join(relation *, relation *);
 
 
 #endif
