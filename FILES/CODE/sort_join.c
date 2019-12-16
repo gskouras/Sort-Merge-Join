@@ -250,56 +250,56 @@ void swap_rel_tuples ( relation *rel , int i , int j ) {
     relation_setpayload ( rel , i , temp_payload ) ;
 }
 
-relation* join(relation *rel_left, relation *rel_right)
-{
-	int i, k = 0;
-	int prevk = 0;
-	relation *updated_rel;
+// relation* join(relation *rel_left, relation *rel_right)
+// {
+// 	int i, k = 0;
+// 	int prevk = 0;
+// 	relation *updated_rel;
 
-	int num_of_tuples = 0;
-	num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
+// 	int num_of_tuples = 0;
+// 	num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
 
-	printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
-	printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
-	printf("num tuples after join are %d\n", num_of_tuples);
+// 	printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
+// 	printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
+// 	printf("num tuples after join are %d\n", num_of_tuples);
 
 
-	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
-	updated_rel->num_tuples = num_of_tuples;
+// 	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
+// 	updated_rel->num_tuples = num_of_tuples;
 
-	for(i = 0; i<rel_left->num_tuples; i++) 
-	{
-		if (i > 0 && isEqual(rel_left, rel_right, i, i-1))
-		{
-			k = prevk;
-		}else{
-			prevk = k;
-	    }
+// 	for(i = 0; i<rel_left->num_tuples; i++) 
+// 	{
+// 		if (i > 0 && isEqual(rel_left, rel_right, i, i-1))
+// 		{
+// 			k = prevk;
+// 		}else{
+// 			prevk = k;
+// 	    }
 
-		if(k == rel_right->num_tuples) break;
+// 		if(k == rel_right->num_tuples) break;
 
-		if(isEqual(rel_left, rel_right, i, k))
-		{
-			while (isEqual(rel_left, rel_right, i, k))
-			{
-				printf("hiii\n");
-				updated_rel->tuples[i].key = rel_left->tuples[i].payload;
-				updated_rel->tuples[i].payload = rel_right->tuples[k].payload;
-				k++;
-			}
-		}else
-		{
-			for( uint64_t j = k; j < rel_right->num_tuples; j++)
-			{
-				if(isEqual(rel_left, rel_right, i, j))
-				{
-					updated_rel->tuples[i].key = rel_left->tuples[i].payload;
-					updated_rel->tuples[i].payload = rel_right->tuples[j].payload;
-				}
-			}
-		}	
-	}
+// 		if(isEqual(rel_left, rel_right, i, k))
+// 		{
+// 			while (isEqual(rel_left, rel_right, i, k))
+// 			{
+// 				printf("hiii\n");
+// 				updated_rel->tuples[i].key = rel_left->tuples[i].payload;
+// 				updated_rel->tuples[i].payload = rel_right->tuples[k].payload;
+// 				k++;
+// 			}
+// 		}else
+// 		{
+// 			for( uint64_t j = k; j < rel_right->num_tuples; j++)
+// 			{
+// 				if(isEqual(rel_left, rel_right, i, j))
+// 				{
+// 					updated_rel->tuples[i].key = rel_left->tuples[i].payload;
+// 					updated_rel->tuples[i].payload = rel_right->tuples[j].payload;
+// 				}
+// 			}
+// 		}	
+// 	}
 
-	relation_print(updated_rel);
-	return (updated_rel);
-}
+// 	relation_print(updated_rel);
+// 	return (updated_rel);
+// }

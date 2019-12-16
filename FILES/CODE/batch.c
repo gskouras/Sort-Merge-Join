@@ -132,9 +132,9 @@ void execute_query(char * query, all_data *datatable)
 
   fill_check_sums(check_sums_str, &check_sums, alias_array);//fill table of check_sums
 
-  //execute_predicates(&predicates, datatable);
+  execute_predicates(&predicates, datatable);
 
-  print_check_sums(&check_sums, datatable);
+  //print_check_sums(&check_sums, datatable);
   
   free(alias_array);
   free(predicates.predicates_array);

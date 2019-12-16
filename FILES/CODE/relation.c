@@ -91,7 +91,7 @@ int relation_checkifsorted ( relation * this ) {
 
 void relation_print ( relation *rel ) {
 
-	for (int i = 0; i < 50 ; i++ ) {
+	for (int i = 0; i < rel->num_tuples ; i++ ) {
 		printf ( "KEY IS %ld PAYLOAD IS %ld \n" , relation_getkey ( rel , i ) , relation_getpayload ( rel , i ) ) ;
 	}
 }

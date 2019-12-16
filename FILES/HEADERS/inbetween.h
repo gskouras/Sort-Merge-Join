@@ -1,4 +1,3 @@
-
 #ifndef _BETWEEN_H_
 #define _BETWEEN_H_
 #include <stdio.h>
@@ -11,7 +10,6 @@
 #include "../HEADERS/batch.h"
 #include "../HEADERS/sort_join.h"
 
-
 ///////////
 //STRUCTS//
 ///////////
@@ -20,13 +18,6 @@ typedef struct {
 	int **farrays;
 	int **jarrays;
 } Between;
-
-
-
-//////////////
-//ESSENTIALS//
-//////////////
-
 
 //////////////
 //ESSENTIALS//
@@ -38,7 +29,6 @@ int *execute_filter( Predicates * , all_data * , Predicate * , int * ) ; //Retur
 
 int check_if_filtered ( int * , int , int );
 
-
 ///////////
 //FILTERS//
 ///////////
@@ -57,35 +47,6 @@ Between *create_between ( Between *); //Allocate memory for our between struct
 
 Between *create_arrays ( Between * , int ) ; //Allocate memory for the filtered and the joined arrays we are going to create
 
-
-int check_if_filtered ( int * , int , int );
-
-
-//////////
-//OTHERS//
-//////////
-
-
-int calculate_relations ( Predicates * ); //return how many relations we are going to use
-
-
-///////////
-//FILTERS//
-///////////
-
-int *greater_filter ( all_data * , int * , Predicate *);
-
-int *lesser_filter ( all_data * , int * , Predicate *);
-
-int *equal_filter ( all_data * , int * , Predicate *);
-
-////////////////
-//CONSTRUCTORS//
-////////////////
-
-Between *create_between ( Between *); //Allocate memory for our between struct
-
-Between *create_arrays ( Between * , int ) ; //Allocate memory for the filtered and the joined arrays we are going to create
 
 //////////
 //OTHERS//
@@ -94,6 +55,14 @@ Between *create_arrays ( Between * , int ) ; //Allocate memory for the filtered 
 int calculate_relations ( Predicates * ); //return how many relations we are going to use
 
 int in_used_relation ( int * , int , int ); //Check if already used
+
+int check_if_filtered ( int * , int , int ); //Check if a relation has been filtered
+
+relation *build_relation( int *, all_data * , Predicate * );// Form a relation from
+
+int calc_tuples_size_to_build_rel( int * , all_data * , Predicate * ); //calculate number of tuples ne need to malloc in build_relation()
+
+
 
 
 

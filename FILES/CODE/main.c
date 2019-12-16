@@ -34,8 +34,8 @@ int main()
   printf("\nRelations have been succesfully saved. Please type 'Done' to continue\n\n");
   getline(&filename,&linesize,stdin);
 
-  //uint64_t element = datatable->table[13]->columns[2]->tuples[37].payload;
-  //printf("The value of element is %ld\n",element);
+  // uint64_t element = datatable->table[3]->columns[2]->tuples[17].payload;
+  // printf("The value of element is %ld\n",element);
   
  	execute_all_batches("small.work", datatable);
 	return 0;
