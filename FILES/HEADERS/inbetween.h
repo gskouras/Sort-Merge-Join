@@ -25,7 +25,9 @@ typedef struct {
 
 void execute_predicates(Predicates *pd, all_data *dt);
 
-int *execute_filter( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
+Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * ) ;//Returns the jarrays updated after the join
+
+int *execute_filter ( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
 
 int check_if_filtered ( int * , int , int );
 
@@ -56,11 +58,15 @@ int calculate_relations ( Predicates * ); //return how many relations we are goi
 
 int in_used_relation ( int * , int , int ); //Check if already used
 
+int *check_if_used ( int * , int * , int * , int , int , Predicate * );
+
 int check_if_filtered ( int * , int , int ); //Check if a relation has been filtered
 
-relation *build_relation( int *, all_data * , Predicate * );// Form a relation from
+int check_if_joined ( int * , int , int ); //Check if a relation has been joined
 
-int calc_tuples_size_to_build_rel( int * , all_data * , Predicate * ); //calculate number of tuples ne need to malloc in build_relation()
+relation *build_relation( int *, all_data * , int , int  );// Form a relation from
+
+int calc_tuples_size_to_build_rel( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
 
 
 

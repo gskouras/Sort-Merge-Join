@@ -12,7 +12,7 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 	int psize = pd->size;
 	int temp_rel;
 	int *cur_array;
-
+	int fflag;
 	//First calculate how many relations we are going to use
 	int total_arrays = calculate_relations ( pd );
 	//Allocate space for our arrays
@@ -20,7 +20,6 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 
 	int filtered[total_arrays]; //Keep which rels we filtered
 	int filter_count = 0;
-	int fflag;
 
 	Predicate *temp_pred;
 	//First execute filter predicates
@@ -41,29 +40,104 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 		}
 	}
 
+	int *flags = malloc ( 2 * sizeof ( int ) ) ; //In this array we keep flags 
+	int joined[total_arrays]; //Keep track of relations tha have been used in a join
+	int join_count = 0;
+	int not_used;
+
 	//Then execute joins
-	for (int i = 0 ; i < 1; i++)
-	{
+	for (int i = 0 ; i < 2; i++) {
 		temp_pred = &pd->predicates_array[i]; 
-		if ( temp_pred->rel2_alias != -1 ) //This means that we have a koin predicate
-		{ 
-			//First check if rel1 is filtered
-			fflag = check_if_filtered ( filtered , filter_count , temp_pred->rel1_alias );
-			if ( fflag )
-			{
-				printf("REL no %d is filtered\n", temp_pred->rel1_origin);
-				build_relation(b->farrays[i], datatable, temp_pred);
+
+		if ( temp_pred->rel2_alias != -1 ) {//This means that we have a join predicate 
+			flags = check_if_used ( flags , joined , filtered , join_count , filter_count , temp_pred ) ;
+			//execute_join
+
+			b = execute_join ( pd , datatable , temp_pred , b , flags );
+
+			//update already joined 
+
+			//Add to joined
+			if ( flags[0] == 0 || flags[0] == 1 ) { //This means that rel1 of temp_pred got joined so we add it to joined
+				joined[join_count++] = temp_pred->rel1_alias;
 			}
-			//Then check if rel2 is filtered
-			fflag = check_if_filtered ( filtered , filter_count , temp_pred->rel2_alias );
-			if ( fflag ) 
-			{
-				//printf("REL no %d is filtered\n", temp_pred->rel2_origin);
-				//build_relation(b->farrays[i], datatable, temp_pred);
+			if ( flags[1] == 0 || flags[1] == 1 ) { //This means that rel2 of temp_pred got joined so we add it to joined
+				joined[join_count++] = temp_pred->rel2_alias;
 			}
 		}
 	}
 
+	free ( flags );
+
+}
+
+Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , Between *b , int *flags ) { //Returns the jarrays updated after the join
+
+	int rel1_no = temp_pred->rel1_origin;
+	int rel2_no = temp_pred->rel1_origin;
+
+	relation *cur1_rel;
+	relation *cur2_rel;
+	relation *result; //Store the result of the jkoin of each case
+
+	if ( (flags[0] == 0 || flags[0] == 1) &&  (flags[1] == 0 || flags[1] == 1) ) { //This means that none of the relations has been joined
+		if ( flags[0] == 0 && flags[1] == 0 ) { // CASE 1 : This means that none of the relations has been filtered;
+			//SORTJOIN//
+			//EXMP result = join(rel1 ,rel2 )
+			//FREE//
+		}
+		else if ( flags[0] == 1 ) { // CASE 2 : This means that the left rel was filtered
+			//BUILD RELATION FOR LEFT REL//
+			//EXMP cur1_rel = build_Relation ( farrays[rel1_no] );
+			//EXMP result = join ( cur1_rel , rel2 );
+			//SORTJOIN//
+			//FREE//
+		}
+		else if ( flags[1] == 1 ) { // CASE 3 : This means that the right rel was filtered
+			//BUILD RELATION FOR RIGHT REL//
+			//SORTJOIN//
+			//FREE//
+		}
+		else { // CASE 4 : This means that both rels are filtered
+			//BUILD RELATION FOR LEFT REL//
+			//BUILD RELATION FOR RIGHT REL//
+			//SORTJOIN//
+			//FREE//
+		}
+	}
+	else { //This means that one of the relations has been joined
+		if ( flags[0] == 2 && flags[1] != 2) { // If left rel is arledy joined and right isnt
+			if (flags[1] == 0 ) { // CASE 5 : This means that right isnt filetered or joined
+				//BUILD RELATION FOR LEFT REL//
+				//SORT JOIN//
+				//FREE//
+			}
+			else { // CASE 6 : This means that right was filterd but not joined yet
+				//BUILD RELATION FOR LEFT REL FROM JARRAYS//
+				//BUILD RELATION FOR RIGHT REL FROM FARRAYS//
+				//FREE//
+			}
+		}
+		else if ( flags[1] == 2 && flags[0] != 2 ) { // Esle If right rel is arledy joined and left isnt
+			if (flags[0] == 0 ) { // CASE 7 : This means that left isnt filetered or joined
+				//BUILD RELATION FOR RIGHT REL//
+				//SORT JOIN//
+				//FREE//
+			}
+			else { // CASE 8 : This means that left was filterd but not joined yet
+				//BUILD RELATION FOR RIGHT REL FROM JARRAYS//
+				//BUILD RELATION FOR LEFT REL FROM FARRAYS//
+				//FREE//
+			}
+		}
+		else{ //CASE 9 : This means both HAve already joined
+			//FILTER CASE//
+			//FREE//
+		}
+	}
+
+
+	return this;
 }
 
 int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , int *result ) 
@@ -96,6 +170,24 @@ int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , i
 	return result;
 }
 
+int *check_if_used ( int *flags , int *joined , int *filtered , int join_count , int filter_count , Predicate *temp_pred ) {
+
+	int rel1_no = temp_pred->rel1_alias;
+	int rel2_no = temp_pred->rel2_alias;
+	//For each relation of the join predicate check if filtered or joined
+	//First check if joined;
+	flags[0] = check_if_joined ( joined , join_count , rel1_no);
+	flags[1] = check_if_joined ( joined , join_count , rel2_no);
+	//Then check for the ones that arent already joined if they are filtered
+	if ( flags[0] !=2 ) { //We  dont check if filtered if it is joined before
+		flags[0] = check_if_filtered ( filtered , filter_count , rel1_no ); //returns 1 if filtered
+	}
+	if ( flags[1] !=2 ) {
+		flags[1] = check_if_filtered ( filtered , filter_count , rel2_no );
+	}
+	return flags;
+}
+
 int check_if_filtered ( int *filtered , int filter_count , int rel ) 
 { //Return 1 if filtered
 	for ( int i = 0 ; i < filter_count ; i++ ) 
@@ -103,6 +195,18 @@ int check_if_filtered ( int *filtered , int filter_count , int rel )
 		if ( filtered[i] == rel )
 		{
 			return 1;
+		}
+	}
+	return 0;
+}
+
+int check_if_joined ( int *joined , int join_count , int rel ) 
+{ //Return 2 if joined
+	for ( int i = 0 ; i < join_count  ; i++ ) 
+	{
+		if ( joined[i] == rel )
+		{
+			return 2;
 		}
 	}
 	return 0;
@@ -248,39 +352,33 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 }
 
 
-relation * build_relation(int * farray, all_data *dt, Predicate *temp_pred)
+relation * build_relation(int * farray, all_data *dt, int rel_no , int col_no )
 {
-	
-	int rel_no = temp_pred->rel1_origin;
-	int col_no = temp_pred->rel1_col;
 	uint64_t size = dt->table[rel_no]->numTuples;
-	int count = 0;
+	int count= 0;
+	int num_of_tuples = calc_tuples_size_to_build_rel(farray, dt, rel_no , col_no );
 
-	int num_of_tuples = calc_tuples_size_to_build_rel(farray, dt, temp_pred);
-
-	relation *updated_rel = (relation*)malloc(sizeof(relation));
-	printf("num_of_tuples_are %d\n", num_of_tuples);
+	relation *updated_rel = malloc(sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
 
-	for (int i = 0; i < size ; ++i)
+	for (int i = 0; i < size ; i++)
 	{
-		if(farray[i] != -1)
-		{	//printf("i is %d\n", i);
-			updated_rel->tuples[i].key = farray[i];
-			updated_rel->tuples[i].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
+		if( farray[i] != -1)
+		{	
+			//printf("i is %d\n", i);
+			updated_rel->tuples[count].key = farray[i];
+			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
+			count++;
 		}
 	}
-	relation_print(updated_rel);
 	return updated_rel;
 }
 	
 
 
-int calc_tuples_size_to_build_rel(int * farray, all_data *dt, Predicate *temp_pred)
+int calc_tuples_size_to_build_rel(int * farray, all_data *dt, int rel_no , int col_no) 
 {
-	int rel_no = temp_pred->rel1_origin;
-	int col_no = temp_pred->rel1_col;
 	uint64_t size = dt->table[rel_no]->numTuples;
 	int count = 0;
 	// printf("size is %ld \n", size);
