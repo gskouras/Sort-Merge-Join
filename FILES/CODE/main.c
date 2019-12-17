@@ -3,18 +3,25 @@
 
 int main()
 { 
-  FILE *rel_init = fopen("small.init", "r");
-  if (rel_init == NULL)
-  {
-    printf("File small.init doesn't exist. Please try another\n");
-    exit(1);
-  }
+
+  FILE *rel_init = initialize_file();
+
+  all_data *datatable;
+  datatable = create_data_table(rel_init);
+
+ 	execute_all_batches("small.work", datatable);
+
+  //free_datatable(datatable);
+
+	return 0;
+}
+
+
+all_data* create_data_table( FILE *rel_init)
+{
   int c;
   char *filename=NULL;
   size_t linesize;
-
-  Batch_lines bl;
-
   all_data *datatable =(all_data *)malloc(sizeof(all_data));
   datatable->num_relations=0;
   datatable->table=NULL;
@@ -34,16 +41,7 @@ int main()
   printf("\nRelations have been succesfully saved. Please type 'Done' to continue\n\n");
   getline(&filename,&linesize,stdin);
 
-
-  //bucket_sort ( datatable->table[3]->columns[2] , 0 , datatable->table[3]->numTuples - 1 , 1 );
-  //relation_print ( datatable->table[3]->columns[2] );
-
-  // uint64_t element = datatable->table[3]->columns[2]->tuples[17].payload;
-  // printf("The value of element is %ld\n",element);
-  
- 	execute_all_batches("small.work", datatable);
-
-	return 0;
+  return datatable;
 }
 
 
@@ -95,5 +93,28 @@ relation_data *read_data_file(char *filename)
 
   return reldata;
 }
+
+
+FILE *initialize_file()
+{
+  FILE *fp = fopen("small.init", "r");
+  if (fp == NULL)
+  {
+    printf("File small.init doesn't exist. Please try another\n");
+    exit(1);
+  }
+  return fp;
+}
+
+
+// void free_datatable(all_data * dt)
+// {
+//   for (int i = 0; i < dt->num_relations; i++)
+//   { 
+//         free(dt->table[i]->columns[i]->tuples);
+//   }
+//   free(dt->table);
+//   free(dt);
+// }
 
 
