@@ -107,12 +107,6 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
 		 	result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
 		 	b->jarrays = update_joined ( b->jarrays , -1 , temp_pred ,  result , joined , join_count);
-
-
-
-		 	for ( int i = 0 ; i < result->num_tuples ; i ++ ) {
-				printf("%d\n",b->jarrays[temp_pred->rel2_alias][i]);
-			}	
 			//FREE//
 		}
 		else if ( flags[1] == 1 ) // CASE 3 : This means that the right rel was filtered
@@ -316,8 +310,8 @@ int check_if_joined ( int *joined , int join_count , int rel )
 //FILTERS//
 ///////////
 
-int *greater_filter ( all_data *dt , int *result , Predicate *temp_pred ) {
-
+int *greater_filter ( all_data *dt , int *result , Predicate *temp_pred ) 
+{
 	int rel_no = temp_pred->rel1_origin;
 	int col_no = temp_pred->rel1_col;
 	uint64_t value =  temp_pred->filter_value;
@@ -394,11 +388,9 @@ Between *create_between ( Between *this ) //Allocate memory for our between stru
 
 
 Between *create_arrays ( Between *this , int total_arrays )  //Allocate memory for the filtered arrays we are going to create
- { 
-
+{ 
 	this->farrays = malloc ( total_arrays * sizeof ( int * ) );
 	this->jarrays = malloc ( total_arrays * sizeof ( int * ) );
-
 }
 
 
@@ -409,7 +401,6 @@ Between *create_arrays ( Between *this , int total_arrays )  //Allocate memory f
 
 int calculate_relations ( Predicates *pd ) 
 {
-
 	int used[pd->size];
 	int count = 0 ;
 	int rel1,rel2; //Here we store the rel origin
@@ -451,6 +442,34 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 	return 1;
 }
 
+relation *build_relation_from_joined(int * array, all_data * dt, int rel_no, int col_no )
+{
+	uint64_t size = dt->table[rel_no]->numTuples;
+	int count= 0;
+	int num_of_tuples = calc_tuples_size_to_build_rel_from_joined(array, dt, rel_no , col_no );
+}
+
+int calc_tuples_size_to_build_rel_from_joined(int * array, all_data * dt, int rel_no, int col_no )
+{
+	uint64_t size = dt->table[rel_no]->numTuples;
+	int count = 0;
+
+	for (int i = 0; i < size; ++i)
+	{
+		if(array[i] != -1)
+		{
+			count++;
+			if(array[i] == array[i-1])
+				count++;
+		}
+	}
+	return count;
+}
+
+
+
+
+
 
 relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , int col_no )
 {
@@ -480,32 +499,7 @@ relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , 
 	return updated_rel;
 }
 
-/*
-relation * build_relation_from_joined ( int *joined , all_data *dt , int rel_no , int col_no ) {
-	uint64_t size = dt->table[rel_no]->numTuples;
-	uint64_t size = dt->table[rel_no]->numTuples;
-	int count= 0;
-	
-	int num_of_tuples = calc_tuples_size_to_build_rel(array, dt, rel_no , col_no );
 
-	relation *updated_rel = malloc(sizeof(relation));
-	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
-	updated_rel->num_tuples = num_of_tuples;
-
-	for (int i = 0; i < size ; i++)
-	{
-		if( array[i] != -1 )
-		{	
-			updated_rel->tuples[count].key = i;
-			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
-			count++;
-
-		}
-	}
-	//relation_print(updated_rel);
-	return updated_rel;
-}
-*/
 
 int calc_tuples_size_to_build_rel_from_filtered(int *array, all_data *dt, int rel_no , int col_no) 
 {

@@ -252,12 +252,13 @@ void swap_rel_tuples ( relation *rel , int i , int j ) {
 
 relation* join(relation *rel_left, relation *rel_right)
 {
-	int i, k = 0;
-	int prevk = 0;
-	relation *updated_rel;
 
-	int num_of_tuples = 0;
-	num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
+	relation *updated_rel;
+	int prev_pos = 0, cur_pos = 0, flag1 = 0, flag2 = 0, counter = 0;
+	int left_total = rel_left->num_tuples;
+	int right_total = rel_right->num_tuples;
+
+	int num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
 
 	printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
 	printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
@@ -266,17 +267,6 @@ relation* join(relation *rel_left, relation *rel_right)
 	updated_rel = malloc (sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
-
-	printf("TUPLES ARE %d\n", num_of_tuples);
-
-
-	int left_total = rel_left->num_tuples;
-	int right_total = rel_right->num_tuples;
-	int prev_pos = 0;
-	int cur_pos = 0;
-	int flag1 = 0;
-	int flag2 = 1;
-	int counter = 0;
 
 	for ( int i = 0 ; i < left_total ; i++ ) {
 		cur_pos = prev_pos;

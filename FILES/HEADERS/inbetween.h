@@ -66,12 +66,14 @@ int check_if_filtered ( int * , int , int ); //Check if a relation has been filt
 
 int check_if_joined ( int * , int , int ); //Check if a relation has been joined
 
-relation *build_relation_from_filtered( int *, all_data * , int , int  );// Form a relation from
+relation *build_relation_from_filtered( int *, all_data * , int , int );// Form a relation from
 
 int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
 
 
+relation *build_relation_from_joined(int *, all_data * , int , int  );
 
+int calc_tuples_size_to_build_rel_from_joined(int *, all_data * , int , int );
 
 
 #endif
