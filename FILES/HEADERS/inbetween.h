@@ -25,7 +25,9 @@ typedef struct {
 
 void execute_predicates(Predicates *pd, all_data *dt);
 
-Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * ) ;//Returns the jarrays updated after the join
+Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * , int * , int ) ;//Returns the jarrays updated after the join
+
+int **update_joined ( int ** , int , Predicate * , relation * , int * , int );
 
 int *execute_filter ( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
 
@@ -64,9 +66,9 @@ int check_if_filtered ( int * , int , int ); //Check if a relation has been filt
 
 int check_if_joined ( int * , int , int ); //Check if a relation has been joined
 
-relation *build_relation( int *, all_data * , int , int  );// Form a relation from
+relation *build_relation_from_filtered( int *, all_data * , int , int  );// Form a relation from
 
-int calc_tuples_size_to_build_rel( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
+int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
 
 
 

@@ -34,10 +34,15 @@ int main()
   printf("\nRelations have been succesfully saved. Please type 'Done' to continue\n\n");
   getline(&filename,&linesize,stdin);
 
+
+  //bucket_sort ( datatable->table[3]->columns[2] , 0 , datatable->table[3]->numTuples - 1 , 1 );
+  //relation_print ( datatable->table[3]->columns[2] );
+
   // uint64_t element = datatable->table[3]->columns[2]->tuples[17].payload;
   // printf("The value of element is %ld\n",element);
   
  	execute_all_batches("small.work", datatable);
+
 	return 0;
 }
 
@@ -74,6 +79,7 @@ relation_data *read_data_file(char *filename)
 	printf("Relations %s has %ju colums", filename,reldata->numColumns);
   reldata->numTuples = numofTuples;
   printf(" and each column has %ju tuples\n",reldata->numTuples);
+
   
   //Filing the array of tuples with the elemenets of the file.
   for(int i=0;i<numofColumns;i++)

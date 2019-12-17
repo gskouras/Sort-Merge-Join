@@ -111,10 +111,10 @@ int extract_and_add_to_temp ( relation *rel , relation *temp , int start , int e
 	uint64_t key,payload;
 
 	for (int i = start; i < end + 1; i++ ){ //Scan original rel's tuples
-		//Get key
-		key = relation_getkey ( rel , i /*position of tuple that we want to get*/);
-		if ( get_sigbyte ( key , bpos ) == byte ) { //Check if it matches current significant byte
-			payload = relation_getpayload ( rel , i ) ; //if yes take payload
+		//Get payload
+		payload = relation_getpayload ( rel , i /*position of tuple that we want to get*/);
+		if ( get_sigbyte ( payload , bpos ) == byte ) { //Check if it matches current significant byte
+			key = relation_getkey ( rel , i ) ; //if yes take payload
 			//Then set the values to temp
 			relation_setkey( temp, temp_counter , key );
 			relation_setpayload( temp , temp_counter , payload );
@@ -163,7 +163,7 @@ int get_psumsize ( int *hist ) {
 
 int *create_hist ( relation *rel , int *hist , int start , int end , int bnum ) {
 	uint64_t s_byte;
-	uint64_t key;
+	uint64_t payload;
 
 	//Set all of hist cells to 0
 	for (int h = 0 ; h <= 255 ; h++ ) {
@@ -171,8 +171,8 @@ int *create_hist ( relation *rel , int *hist , int start , int end , int bnum ) 
 	}
 	//Check all of the relation's tuples' bnum significant byte and add 1 to the matching hist cell
 	for (int i = start ; i <= end ; i++ ) {
-		key = relation_getkey ( rel , i ) ;
-		s_byte = get_sigbyte ( key , bnum ) ;
+		payload = relation_getpayload ( rel , i ) ;
+		s_byte = get_sigbyte ( payload , bnum ) ;
 		hist[s_byte]++;
 	}
 	return hist; 
@@ -180,8 +180,8 @@ int *create_hist ( relation *rel , int *hist , int start , int end , int bnum ) 
 
 //Returns i significant byte of the key
 
-uint64_t get_sigbyte ( uint64_t key , int i ) {
-	uint64_t s_byte = key << ( i - 1 ) * 8 ;
+uint64_t get_sigbyte ( uint64_t payload , int i ) {
+	uint64_t s_byte = payload << ( i - 1 ) * 8 ;
 	s_byte = s_byte >> 7 * 8 ;
 	return s_byte;
 }
@@ -219,12 +219,12 @@ void quicksort ( relation *rel , int start , int end ) {
 
 int partition ( relation *rel , int start , int end ) {
 
-    uint64_t pivot = relation_getkey ( rel , end ) ;  
+    uint64_t pivot = relation_getpayload ( rel , end ) ;  
  
     int i = ( start - 1) ;
     for ( int j = start ; j <= end- 1; j++){
         // If current element is smaller than the pivot
-        if ( relation_getkey ( rel , j ) < pivot ){
+        if ( relation_getpayload ( rel , j ) < pivot ){
             i++;
             swap_rel_tuples ( rel , i , j ) ;
         }
@@ -263,43 +263,46 @@ relation* join(relation *rel_left, relation *rel_right)
 	printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
 	printf("num tuples after join are %d\n", num_of_tuples);
 
-
+	updated_rel = malloc (sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
 
-	for(i = 0; i<rel_left->num_tuples; i++) 
-	{
-		if (i > 0 && isEqual(rel_left, rel_right, i, i-1))
-		{
-			k = prevk;
-		}else{
-			prevk = k;
-	    }
+	printf("TUPLES ARE %d\n", num_of_tuples);
 
-		if(k == rel_right->num_tuples) break;
 
-		if(isEqual(rel_left, rel_right, i, k))
-		{
-			while (isEqual(rel_left, rel_right, i, k))
-			{
-				printf("hiii\n");
-				updated_rel->tuples[i].key = rel_left->tuples[i].payload;
-				updated_rel->tuples[i].payload = rel_right->tuples[k].payload;
-				k++;
-			}
-		}else
-		{
-			for( uint64_t j = k; j < rel_right->num_tuples; j++)
-			{
-				if(isEqual(rel_left, rel_right, i, j))
-				{
-					updated_rel->tuples[i].key = rel_left->tuples[i].payload;
-					updated_rel->tuples[i].payload = rel_right->tuples[j].payload;
+	int left_total = rel_left->num_tuples;
+	int right_total = rel_right->num_tuples;
+	int prev_pos = 0;
+	int cur_pos = 0;
+	int flag1 = 0;
+	int flag2 = 1;
+	int counter = 0;
+
+	for ( int i = 0 ; i < left_total ; i++ ) {
+		cur_pos = prev_pos;
+		while ( cur_pos < right_total ) { //continue while loop when you find equal payloads after ecah other
+			if ( isEqual (rel_left , rel_right , i , cur_pos ) ) {
+				updated_rel->tuples[counter].key = rel_left->tuples[i].key;
+				updated_rel->tuples[counter].payload = rel_right->tuples[cur_pos].key;
+				counter ++;
+				while ( isEqual (rel_right , rel_right , cur_pos , cur_pos + 1) ) {
+					updated_rel->tuples[counter].key = rel_left->tuples[i].key;
+					updated_rel->tuples[counter].payload = rel_right->tuples[cur_pos].key;
+					cur_pos++;
+					counter++;
 				}
 			}
-		}	
-	}
+			cur_pos++;
+		}
+		if ( i < left_total - 1 ) {
+			if ( !(isEqual(rel_left, rel_left , i , i + 1 )) && flag1 == 1 ) {
+				prev_pos = cur_pos + 1;
+			}
+		}
 
+		flag1 = 0;
+		flag2 = 1;
+	}
 
 	return (updated_rel);
 }
@@ -307,38 +310,36 @@ relation* join(relation *rel_left, relation *rel_right)
 
 int calc_tuples_size_after_join(relation *rel_left, relation *rel_right)
 {
-	int i, k = 0;
-	int prevk = 0;
-	int count = 0;
 
-	for(i = 0; i<rel_left->num_tuples; i++) 
-	{
-		if (i > 0 && isEqual(rel_left, rel_right, i, i-1))
-		{
-			k = prevk;
-		}else{
-			prevk = k;
-	    }
+	int left_total = rel_left->num_tuples;
+	int right_total = rel_right->num_tuples;
+	int prev_pos = 0;
+	int cur_pos = 0;
+	int flag1 = 0;
+	int flag2 = 1;
+	int counter = 0;
 
-		if(k == rel_right->num_tuples) break;
-
-		if(isEqual(rel_left, rel_right, i, k))
-		{
-			while (isEqual(rel_left, rel_right, i, k))
-			{
-				count++;
-				k++;
-			}
-		}else
-		{
-			for( uint64_t j = k; j < rel_right->num_tuples; j++)
-			{
-				if(isEqual(rel_left, rel_right, i, j))
-				{
-					count++;
+	for ( int i = 0 ; i < left_total ; i++ ) {
+		cur_pos = prev_pos;
+		while ( cur_pos < right_total ) { //continue while loop when you find equal payloads after ecah other
+			if ( isEqual (rel_left , rel_right , i , cur_pos ) ) {
+				counter ++;
+				while ( isEqual (rel_right , rel_right , cur_pos , cur_pos + 1) ) {
+					cur_pos++;
+					counter++;
 				}
-			}	
+			}
+			cur_pos++;
 		}
+		if ( i < left_total - 1 ) {
+			if ( !(isEqual(rel_left, rel_left , i , i + 1 )) && flag1 == 1 ) {
+				prev_pos = cur_pos + 1;
+			}
+		}
+
+		flag1 = 0;
+		flag2 = 1;
 	}
-	return count;	
+
+	return counter;	
 }

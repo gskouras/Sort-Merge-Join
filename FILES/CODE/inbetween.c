@@ -53,7 +53,7 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 			flags = check_if_used ( flags , joined , filtered , join_count , filter_count , temp_pred ) ;
 			//execute_join
 
-			b = execute_join ( pd , datatable , temp_pred , b , flags );
+			b = execute_join ( pd , datatable , temp_pred , b , flags , joined , join_count );
 
 			//update already joined 
 
@@ -71,7 +71,7 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 
 }
 
-Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , Between *b , int *flags ) { //Returns the jarrays updated after the join
+Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , Between *b , int *flags , int *joined , int join_count ) { //Returns the jarrays updated after the join
 
 	int rel1_no = temp_pred->rel1_origin;
 	int rel2_no = temp_pred->rel1_origin;
@@ -98,19 +98,27 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 		else if ( flags[0] == 1 ) // CASE 2 : This means that the left rel was filtered
 		{ 
 			//BUILD RELATION FOR LEFT REL//
-			cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+			cur1_rel = build_relation_from_filtered(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 			left = relation_getnumtuples( cur1_rel); //total tuples in left relation
 			right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
 			//SORTJOIN//
 			bucket_sort(cur1_rel, 0, left-1, 1);
+
 			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
 		 	result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
+		 	b->jarrays = update_joined ( b->jarrays , -1 , temp_pred ,  result , joined , join_count);
+
+
+
+		 	for ( int i = 0 ; i < result->num_tuples ; i ++ ) {
+				printf("%d\n",b->jarrays[temp_pred->rel2_alias][i]);
+			}	
 			//FREE//
 		}
 		else if ( flags[1] == 1 ) // CASE 3 : This means that the right rel was filtered
 		{ 
 			//BUILD RELATION FOR RIGHT REL//
-			cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+			cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 			//SORTJOIN//
 			left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
 			right = relation_getnumtuples( cur2_rel); //total tuples in right relation
@@ -122,9 +130,9 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 		}
 		else // CASE 4 : This means that both rels are filtered
 		{	//BUILD RELATION FOR LEFT REL//
-			cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+			cur1_rel = build_relation_from_filtered(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 			//BUILD RELATION FOR RIGHT REL//
-			cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+			cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 			//SORTJOIN//
 			left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
 			right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
@@ -141,7 +149,7 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			if (flags[1] == 0 ) // CASE 5 : This means that right isnt filetered or joined
 			{ 
 				//BUILD RELATION FOR LEFT REL//
-				cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				//cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				//SORT JOIN//
 				left = relation_getnumtuples( cur1_rel); //total tuples in left relation
 				right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
@@ -154,9 +162,9 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			else // CASE 6 : This means that right was filterd but not joined yet
 			{ 
 				// //BUILD RELATION FOR LEFT REL FROM JARRAYS//
-				 cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				// cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				// //BUILD RELATION FOR RIGHT REL FROM FARRAYS//
-				 cur2_rel = build_relation(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				 cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
 				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
 				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
@@ -171,7 +179,7 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			if (flags[0] == 0 ) // CASE 7 : This means that left isnt filetered or joined
 			{ 
 				// //BUILD RELATION FOR RIGHT REL//
-				 cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				// cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
 				 left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
 				 right = relation_getnumtuples( cur2_rel); //total tuples in right relation
@@ -184,9 +192,9 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			else  // CASE 8 : This means that left was filterd but not joined yet
 			{
 				// //BUILD RELATION FOR LEFT REL FROM FARRAYS//
-				 cur1_rel = build_relation(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				 cur1_rel = build_relation_from_filtered(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				// //BUILD RELATION FOR RIGHT REL FROM JARRAYS//
-				 cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				// cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
 				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
 				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
@@ -206,6 +214,30 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 
 
 	return b;
+}
+
+int **update_joined ( int **jarrays , int rel_ref , Predicate *temp_pred , relation *result , int *joined , int join_count ) {
+
+	int rel1_no = temp_pred->rel1_alias;
+	int rel2_no = temp_pred->rel2_alias;
+	int size = result->num_tuples;
+
+	if ( rel_ref == -1 ) { //THis is the case when jarrays is empty
+
+		//First allocate memory for the first jarray
+		jarrays[rel1_no] = malloc ( size * sizeof(int ) ) ;
+		//Then allocate memory for the second jarray
+		jarrays[rel2_no] = malloc ( size * sizeof(int ) ) ;
+		//Now fill the arrays from the result
+		for ( int i = 0 ; i < size ; i ++ ) {
+			jarrays[rel1_no][i] = result->tuples[i].key;
+			jarrays[rel2_no][i] = result->tuples[i].payload;
+		}
+	}
+
+
+
+	return jarrays;
 }
 
 int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , int *result ) 
@@ -420,13 +452,14 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 }
 
 
-relation * build_relation(int * array, all_data *dt, int rel_no , int col_no )
+relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , int col_no )
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
 	int count= 0;
-
 	
-	int num_of_tuples = calc_tuples_size_to_build_rel(array, dt, rel_no , col_no );
+	int num_of_tuples = calc_tuples_size_to_build_rel_from_filtered(array, dt, rel_no , col_no );
+
+	//printf("SIZE IS %d\n", num_of_tuples );
 
 	relation *updated_rel = malloc(sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
@@ -435,9 +468,9 @@ relation * build_relation(int * array, all_data *dt, int rel_no , int col_no )
 
 	for (int i = 0; i < size ; i++)
 	{
-		if( array[i] != -1)
+		if( array[i] != -1 )
 		{	
-			updated_rel->tuples[count].key = array[i];
+			updated_rel->tuples[count].key = i;
 			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
 			count++;
 
@@ -446,21 +479,43 @@ relation * build_relation(int * array, all_data *dt, int rel_no , int col_no )
 	//relation_print(updated_rel);
 	return updated_rel;
 }
+
+/*
+relation * build_relation_from_joined ( int *joined , all_data *dt , int rel_no , int col_no ) {
+	uint64_t size = dt->table[rel_no]->numTuples;
+	uint64_t size = dt->table[rel_no]->numTuples;
+	int count= 0;
 	
+	int num_of_tuples = calc_tuples_size_to_build_rel(array, dt, rel_no , col_no );
 
+	relation *updated_rel = malloc(sizeof(relation));
+	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
+	updated_rel->num_tuples = num_of_tuples;
 
-int calc_tuples_size_to_build_rel(int *array, all_data *dt, int rel_no , int col_no) 
+	for (int i = 0; i < size ; i++)
+	{
+		if( array[i] != -1 )
+		{	
+			updated_rel->tuples[count].key = i;
+			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
+			count++;
+
+		}
+	}
+	//relation_print(updated_rel);
+	return updated_rel;
+}
+*/
+
+int calc_tuples_size_to_build_rel_from_filtered(int *array, all_data *dt, int rel_no , int col_no) 
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
 	int count = 0;
-	printf("size is %ld \n", size);
-	printf("The relation has been filtered is r%d col%d\n",rel_no, col_no );
 
 	for (int i = 0; i < size ; ++i)
 	{
 		if(array[i] != -1)
 		{
-
 			count++;
 		}
 	}
