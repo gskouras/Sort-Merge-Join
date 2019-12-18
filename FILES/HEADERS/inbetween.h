@@ -24,11 +24,11 @@ typedef struct {
 //ESSENTIALS//
 //////////////
 
-void execute_predicates(Predicates *pd, all_data *dt);
+Between *execute_predicates(Predicates * , all_data * , Between * );
 
-Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * , int * , int ) ;//Returns the jarrays updated after the join
+Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * , int * , int , int ) ;//Returns the jarrays updated after the join
 
-int **update_joined ( int ** , int * , int , int , Predicate * , relation * , int * , int );
+int **update_joined ( int ** , int * , int , int , Predicate * , relation * , int * , int , int );
 
 int *execute_filter ( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
 
@@ -57,6 +57,14 @@ Between *create_arrays ( Between * , int ) ; //Allocate memory for the filtered 
 //OTHERS//
 //////////
 
+int **fill_new_joined ( int ** , int ** , int  , int , int , int , int , relation * , int );
+
+int **fill_already_joined ( int ** , int ** , int , int i , int , int *, int); 
+
+int calculate_new_size ( int * , int , relation * , int );
+
+int times_in_result ( int , relation * , int ) ;
+
 int calculate_relations ( Predicates * ); //return how many relations we are going to use
 
 int in_used_relation ( int * , int , int ); //Check if already used
@@ -74,7 +82,9 @@ int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int 
 
 relation *build_relation_from_joined(int * , int *, all_data * , int , int , int  );
 
-int calc_tuples_size_to_build_rel_from_joined(int *, all_data * , int , int );
+int is_visited( int * , int  , int  );
+
+int calc_tuples_size_to_build_rel_from_joined(int *, int * , all_data * , int , int , int );
 
 
 #endif

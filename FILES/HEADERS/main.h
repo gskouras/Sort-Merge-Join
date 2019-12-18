@@ -14,6 +14,7 @@
 #include "../HEADERS/batch.h"
 #include "../HEADERS/sort_join.h"
 
+
 relation_data *read_data_file(char * );
 
 all_data * create_data_table( FILE * );

@@ -1,14 +1,13 @@
+
 #include "../HEADERS/inbetween.h"
-
-
 
 //////////////
 //ESSENTIALS//
 //////////////
 
-void execute_predicates(Predicates *pd, all_data *datatable)
+Between *execute_predicates(Predicates *pd, all_data *datatable , Between *b)
 {
-	Between *b = create_between ( b ) ;
+	b = create_between ( b ) ;
 	int psize = pd->size;
 	int temp_rel;
 	int *cur_array;
@@ -53,7 +52,7 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 			flags = check_if_used ( flags , joined , filtered , join_count , filter_count , temp_pred ) ;
 			//execute_join
 
-			b = execute_join ( pd , datatable , temp_pred , b , flags , joined , join_count );
+			b = execute_join ( pd , datatable , temp_pred , b , flags , joined , join_count , total_arrays );
 
 			//Add to joined
 			if ( flags[0] == 0 || flags[0] == 1 ) { //This means that rel1 of temp_pred got joined so we add it to joined
@@ -65,16 +64,20 @@ void execute_predicates(Predicates *pd, all_data *datatable)
 		}
 	}
 
+	return b;
+
 	free ( flags );
 
 }
 
-Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , Between *b , int *flags , int *joined , int join_count ) { //Returns the jarrays updated after the join
+Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , Between *b , int *flags , int *joined , int join_count , int total_arrays ) { //Returns the jarrays updated after the join
 
 	int rel1_no = temp_pred->rel1_origin;
-	int rel2_no = temp_pred->rel1_origin;
+	int rel2_no = temp_pred->rel2_origin;
 	int rel1_col = temp_pred->rel1_col;
 	int rel2_col = temp_pred->rel2_col;
+	int rel1_al = temp_pred->rel1_alias;
+	int rel2_al = temp_pred->rel2_alias;
 	int left, right;
 
 	relation *cur1_rel;
@@ -103,9 +106,12 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			bucket_sort(cur1_rel, 0, left-1, 1);
 			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
 		 	result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
-		 	b->jarrays = update_joined ( b->jarrays , b->jarrays_size , -1 , -1 , temp_pred ,  result , joined , join_count);
+		 	b->jarrays = update_joined ( b->jarrays , b->jarrays_size , -1 , -1 , temp_pred ,  result , joined , join_count , total_arrays );
+		 	b->jarrays_size[rel1_al] = result->num_tuples;
+		 	b->jarrays_size[rel2_al] = result->num_tuples;
 			//FREE//
 			free(cur1_rel);
+			free(result);
 		}
 		else if ( flags[1] == 1 ) // CASE 3 : This means that the right rel was filtered
 		{ 
@@ -140,20 +146,20 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 		{ 
 			if (flags[1] == 0 ) // CASE 5 : This means that right isnt filetered or joined
 			{ 
-				printf("ASD\n");
+
 				//BUILD RELATION FOR LEFT REL//
-				cur1_rel = build_relation_from_joined(b->jarrays[temp_pred->rel1_alias] , b->jarrays_size , dt, rel1_no , temp_pred->rel1_alias , rel1_col );
-				relation_print(cur1_rel);
+				cur1_rel = build_relation_from_joined(b->jarrays[rel1_al] , b->jarrays_size , dt, rel1_no , rel1_al , rel1_col );
 				//SORT JOIN//
 				left = relation_getnumtuples( cur1_rel); //total tuples in left relation
-				//printf("TUPLES ARE %d\n" , relation_getnumtuples( cur1_rel));
 				right = relation_getnumtuples( dt->table[rel2_no]->columns[rel2_col] ); //total tuples in right relation
 				//SORTJOIN//
 				bucket_sort(cur1_rel, 0, left-1, 1);
 				bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
 		 		result = join ( cur1_rel , dt->table[rel2_no]->columns[rel2_col] );
+		 		b->jarrays = update_joined ( b->jarrays , b->jarrays_size , rel1_al , rel2_al , temp_pred ,  result , joined , join_count , total_arrays );
 				//FREE//
-				printf("ASD\n");
+				free(cur1_rel);
+				free(result);
 			}
 			else // CASE 6 : This means that right was filtered but not joined yet
 			{ 
@@ -212,34 +218,134 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 	return b;
 }
 
-int **update_joined ( int **jarrays , int *jarrays_size , int rel_ref , int rel_new , Predicate *temp_pred , relation *result , int *joined , int join_count ) {
+int **update_joined ( int **jarrays , int *jarrays_size , int rel_ref , int rel_new , Predicate *temp_pred , relation *result , int *joined , int join_count , int total_arrays ) {
 
 	int rel1_no = temp_pred->rel1_alias;
 	int rel2_no = temp_pred->rel2_alias;
 	int size = result->num_tuples;
+	int count = 0;
+	int new_size;
+	int fill_counter = 0;
+	int times;
+	int cur_line = 0;
+	int check = 0;
+	int **new_jarrays;
+
+	int index = 1; //FInd out if we need the left values of the result
+	if ( rel_ref == rel1_no ) {
+		index = 0;
+	}
 
 	if ( rel_ref == -1 ) { //THis is the case when jarrays is empty
 
-		//First allocate memory for the first jarray
-		jarrays[rel1_no] = malloc ( size * sizeof(int ) ) ;
-		//Then allocate memory for the second jarray
-		jarrays[rel2_no] = malloc ( size * sizeof(int ) ) ;
+		//First allocate memory for the all the jarrays based on our first join result
+		for ( int i = 0 ; i < total_arrays ; i++ ) {
+			jarrays[i] = malloc ( size * sizeof(int ) ) ;
+		}
+
 		//Now fill the arrays from the result
 		for ( int i = 0 ; i < size ; i ++ ) {
-			jarrays[rel1_no][i] = result->tuples[i].key;
-			jarrays[rel2_no][i] = result->tuples[i].payload;
+			jarrays[rel1_no][i] = result->tuples[i].payload;
+			jarrays[rel2_no][i] = result->tuples[i].key;
 		}
-		jarrays_size[rel1_no] = size;
-		jarrays_size[rel2_no] = size;
-	}
-	else { //This is the case when jarrays isn empty
-
-	}
-
-
-
+		for ( int i = 0 ; i < total_arrays ; i++ ) {
+			jarrays_size[i] = size;
+		}
 
 	return jarrays;
+	}
+	else { //This is the case when jarrays isnt empty
+
+		//check already joined based on rel_ref
+
+		//First calculate the new size
+		new_size = calculate_new_size ( jarrays[rel_ref] , jarrays_size[rel_ref] , result , index);
+		//Now allocate the new between jarrays;
+		new_jarrays = malloc ( total_arrays * sizeof ( int * ) );
+		for ( int i = 0 ; i < total_arrays ; i++ ) {
+			new_jarrays[i] = malloc ( new_size * sizeof(int ) ) ;
+		}
+		//NOW FILL THE NEW_JARRAYS
+		for ( int i = 0 ; i < jarrays_size[rel_ref] ; i++ ) {
+			times = times_in_result ( jarrays[rel_ref][i] , result , index ) ;
+			new_jarrays = fill_already_joined ( new_jarrays , jarrays , i , cur_line , times , joined , join_count );
+			new_jarrays = fill_new_joined ( new_jarrays , jarrays , i , rel_ref , rel_new , cur_line, times , result , index );
+			cur_line += times ;
+		}
+		for ( int i = 0 ; i < total_arrays ; i++ ) {
+			jarrays_size[i] = new_size;
+		}
+
+	//free(jarrays);
+	return new_jarrays;
+	}
+}
+
+int **fill_new_joined ( int **new_jarrays , int **jarrays , int prev , int rel_ref , int rel_new , int line , int times , relation *result , int index ) {
+	int new_index;
+	if (index == 0 ) {
+		new_index = 1;
+	}
+	else {
+		new_index = 0;
+	}
+
+	for ( int k = line ; k < line + times ; k++ ) {
+		for ( int j = 0 ; j < result->num_tuples ; j++ ) {
+			if (new_index == 1) {
+				if ( jarrays[rel_ref][prev] == result->tuples[j].payload ) {
+					new_jarrays[rel_new][k] = result->tuples[j].key;
+				}
+			}
+			else{
+				if ( jarrays[rel_ref][prev] == result->tuples[j].key ) {
+					new_jarrays[rel_new][k] = result->tuples[j].payload;
+				}
+			}
+		}
+	}	
+	return new_jarrays;
+}
+
+
+int **fill_already_joined ( int **new_jarrays , int **jarrays , int prev , int line , int times , int *joined , int join_count ) {
+
+	int cur_rel;
+	for ( int k = line ; k < line + times ; k++ ) {
+		for ( int i =0 ; i < join_count ; i++ ) {
+			cur_rel = joined[i];
+			new_jarrays[cur_rel][k] = jarrays[cur_rel][prev];
+		}
+	}	
+
+	return new_jarrays;
+}
+
+
+int calculate_new_size ( int *jarray , int prev_size , relation *result , int index ) {
+	int sum = 0;
+	for ( int i = 0 ; i < prev_size ; i++ ) { 
+		sum += times_in_result ( jarray[i] , result , index );
+	}
+	return sum;
+}
+
+int times_in_result ( int value , relation *result , int index ) {
+	int size = result->num_tuples;
+	int count = 0 ;
+	for ( int i = 0 ; i < size ; i++ ) {
+		if(!index){
+			if (value == result->tuples[i].payload) {
+				count++;
+			}
+		}
+		else{
+			if (value == result->tuples[i].key) {
+				count++;
+			}
+		}
+	}
+	return count;
 }
 
 int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , int *result ) 
@@ -454,33 +560,58 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 relation *build_relation_from_joined(int * array , int *jarrays_size , all_data * dt, int rel_no , int rel_alias , int col_no )
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
-	int num_of_tuples = jarrays_size[rel_alias];
+	int num_of_tuples = calc_tuples_size_to_build_rel_from_joined( array , jarrays_size , dt, rel_no , rel_alias , col_no );
+
 	int count = 0;
 	relation *updated_rel = malloc(sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
+	int visited[num_of_tuples];
+	int visited_count = 0;
+
 
 	for (int i = 0; i < num_of_tuples ; i++)
 	{
-		if( array[i] != -1 )
-		{	
-			updated_rel->tuples[count].key = i;
+		if ( !(is_visited(visited,visited_count,array[i])) ) {
+			updated_rel->tuples[count].key = array[i];
 			updated_rel->tuples[count].payload = dt->table[rel_no]->columns[col_no]->tuples[i].payload;
 			count++;
+			visited[visited_count] = array[i];
+			visited_count++;
 		}
 	}
 	return updated_rel;
 	
 }
 
-int calc_tuples_size_to_build_rel_from_joined(int * array, all_data * dt, int rel_no, int col_no )
+int calc_tuples_size_to_build_rel_from_joined(int * array ,  int *jarrays_size , all_data * dt, int rel_no , int rel_alias, int col_no )
 {
 	uint64_t size = dt->table[rel_no]->numTuples;
+	int num_of_tuples = jarrays_size[rel_alias];
 	int count = 0;
+	int visited[num_of_tuples];
+	int visited_count = 0;
 
+
+	for (int i = 0; i < num_of_tuples ; i++)
+	{
+		if ( !(is_visited(visited,visited_count,array[i])) ) {
+			count++;
+			visited[visited_count] = array[i];
+			visited_count++;
+		}
+	}
 	return count;
 }
 
+int is_visited( int *array , int size , int val ) {
+	for ( int i = 0 ; i < size ; i++ ) {
+		if (array[i] == val ) {
+			return 1;
+		}
+	}
+	return 0;
+}
 
 
 
@@ -493,7 +624,6 @@ relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , 
 	
 	int num_of_tuples = calc_tuples_size_to_build_rel_from_filtered(array, dt, rel_no , col_no );
 
-	//printf("SIZE IS %d\n", num_of_tuples );
 
 	relation *updated_rel = malloc(sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
@@ -510,7 +640,6 @@ relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , 
 
 		}
 	}
-	//relation_print(updated_rel);
 	return updated_rel;
 }
 

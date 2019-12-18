@@ -1,6 +1,10 @@
 #include "../HEADERS/batch.h"
 #include "../HEADERS/inbetween.h"
 
+void print_check_sums(Check_sums * , all_data * , Between *);
+
+
+
 Batches * createBatches(char *filename, char *s)
 {
   int count1 = 0, count2 = 0, c;
@@ -84,7 +88,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 
 void execute_batch(Batch_lines * bl, all_data * datatable )
 {
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < bl->size; ++i)
 	{
 		execute_query(bl->batch[i], datatable);
 	}
@@ -132,14 +136,42 @@ void execute_query(char * query, all_data *datatable)
 
   fill_check_sums(check_sums_str, &check_sums, alias_array);//fill table of check_sums
 
-  execute_predicates(&predicates, datatable);
+  Between *b;
+  b = execute_predicates(&predicates, datatable , b);
 
-  //print_check_sums(&check_sums, datatable);
+  print_check_sums( &check_sums, datatable , b);
   
+  free(b);
   free(alias_array);
   free(predicates.predicates_array);
   free(check_sums.check_sums_array);
 
+}
+
+void print_check_sums(Check_sums *cs, all_data *dt,Between *b)
+{
+  relation *rel_to_print;
+  int sum = 0;
+  int result_size = b->jarrays_size[0];
+  int rel_al , rel_or;
+  int cur_res;
+  int visited[result_size];
+  int visited_count = 0;
+  int col;
+
+  for (int i = 0; i < cs->size ; i++)
+  {
+    rel_al = cs->check_sums_array[i].rel_alias;
+    rel_or = cs->check_sums_array[i].rel_origin;
+    col = cs->check_sums_array[i].rel_col;
+    for ( int res = 0 ; res < result_size ; res++ ) {
+        cur_res = b->jarrays[rel_al][res];
+        sum += dt->table[rel_or]->columns[col]->tuples[cur_res].payload;
+    }
+    printf("%d\t", sum);
+    sum -= sum;
+  }
+  printf("\n");
 }
 
 void fill_relations(char *rel_str, int *alias_array)
@@ -272,24 +304,6 @@ int find_num_of_predicates(char * pred_line)
 }
 
 
-void print_check_sums(Check_sums *cs, all_data *dt)
-{
-  relation *rel_to_print;
-  int sum = 0;
-  for (int i = 0; i < cs->size; ++i)
-  {
-    rel_to_print = dt->table[cs->check_sums_array[i].rel_origin]->columns[cs->check_sums_array[i].rel_col];
-
-    for (int j = 0; j < rel_to_print->num_tuples; ++j)
-    {
-      sum += rel_to_print->tuples[j].payload;
-    }
-
-    printf("Sum is %d\t", sum );
-    //relation_print(rel_to_print);
-  }
-  printf("\n");
-}
 
 void free_all_batches(Batches * batches)
 {

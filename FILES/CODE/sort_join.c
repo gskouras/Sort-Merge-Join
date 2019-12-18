@@ -260,9 +260,9 @@ relation* join(relation *rel_left, relation *rel_right)
 
 	int num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
 
-	printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
-	printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
-	printf("num tuples after join are %d\n", num_of_tuples);
+	//printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
+	//printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
+	//printf("num tuples after join are %d\n", num_of_tuples);
 
 	updated_rel = malloc (sizeof(relation));
 	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
@@ -272,12 +272,12 @@ relation* join(relation *rel_left, relation *rel_right)
 		cur_pos = prev_pos;
 		while ( cur_pos < right_total ) { //continue while loop when you find equal payloads after ecah other
 			if ( isEqual (rel_left , rel_right , i , cur_pos ) ) {
-				updated_rel->tuples[counter].key = rel_left->tuples[i].key;
-				updated_rel->tuples[counter].payload = rel_right->tuples[cur_pos].key;
+				updated_rel->tuples[counter].payload = rel_left->tuples[i].key;
+				updated_rel->tuples[counter].key = rel_right->tuples[cur_pos].key;
 				counter ++;
 				while ( isEqual (rel_right , rel_right , cur_pos , cur_pos + 1) ) {
-					updated_rel->tuples[counter].key = rel_left->tuples[i].key;
-					updated_rel->tuples[counter].payload = rel_right->tuples[cur_pos].key;
+					updated_rel->tuples[counter].payload = rel_left->tuples[i].key;
+					updated_rel->tuples[counter].key = rel_right->tuples[cur_pos].key;
 					cur_pos++;
 					counter++;
 				}

@@ -10,6 +10,7 @@
 #include "../HEADERS/relation.h"
 
 
+
 typedef struct
 {
 	char **batch; //pointer to each query of a bach
@@ -83,7 +84,6 @@ void fill_check_sums(char *check_sum_str, Check_sums *cs, int * alias_array);///
 
 int isnumber(char * number); //checking if a given string is number
 
-void print_check_sums(Check_sums * cs, all_data *datatable);
 
 
 
