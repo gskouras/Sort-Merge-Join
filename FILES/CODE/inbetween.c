@@ -95,6 +95,7 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			bucket_sort(dt->table[rel2_no]->columns[rel2_col], 0, right-1, 1 );
 			result = join(dt->table[rel1_no]->columns[rel1_col] ,dt->table[rel2_no]->columns[rel2_col] );
 			//FREE//
+			free(result);
 		}
 		else if ( flags[0] == 1 ) // CASE 2 : This means that the left rel was filtered
 		{ 
@@ -124,7 +125,12 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
 			bucket_sort(cur2_rel, 0, right-1, 1);
 		 	result = join ( dt->table[rel1_no]->columns[rel1_col] , cur2_rel );
+		 	b->jarrays = update_joined ( b->jarrays , b->jarrays_size , -1 , -1 , temp_pred ,  result , joined , join_count , total_arrays );
+		 	b->jarrays_size[rel1_al] = result->num_tuples;
+		 	b->jarrays_size[rel2_al] = result->num_tuples;
 			//FREE//
+			free(cur2_rel);
+			free(result);
 		}
 		else // CASE 4 : This means that both rels are filtered
 		{	//BUILD RELATION FOR LEFT REL//
@@ -164,16 +170,20 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			else // CASE 6 : This means that right was filtered but not joined yet
 			{ 
 				// //BUILD RELATION FOR LEFT REL FROM JARRAYS//
-				// cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				// //BUILD RELATION FOR RIGHT REL FROM FARRAYS//
-				 cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
-				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
-				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
-				 bucket_sort(cur1_rel, 0, left-1, 1 );
-				 bucket_sort(cur2_rel, 0, right-1, 1 );
-				 result = join ( cur1_rel , cur2_rel );
+				left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
+				right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
+				bucket_sort(cur1_rel, 0, left-1, 1 );
+				bucket_sort(cur2_rel, 0, right-1, 1 );
+				result = join ( cur1_rel , cur2_rel );
+				b->jarrays = update_joined ( b->jarrays , b->jarrays_size , rel1_al , rel2_al , temp_pred ,  result , joined , join_count , total_arrays );
 				//FREE//
+				free(cur1_rel);
+				free(cur2_rel);
+				free(result);
 			}
 		}
 		else if ( flags[1] == 2 && flags[0] != 2 ) // Esle If right rel is arledy joined and left isnt
@@ -181,28 +191,31 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			if (flags[0] == 0 ) // CASE 7 : This means that left isnt filetered or joined
 			{ 
 				// //BUILD RELATION FOR RIGHT REL//
-				// cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
-				 left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
-				 right = relation_getnumtuples( cur2_rel); //total tuples in right relation
+				left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
+				right = relation_getnumtuples( cur2_rel); //total tuples in right relation
 				// //SORTJOIN//
-				 bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
-				 bucket_sort(cur2_rel, 0, right-1, 1);
+				bucket_sort(dt->table[rel1_no]->columns[rel1_col], 0, left-1, 1 );
+				bucket_sort(cur2_rel, 0, right-1, 1);
 		 	 	result = join ( dt->table[rel1_no]->columns[rel1_col] , cur2_rel );
+		 	 	b->jarrays = update_joined ( b->jarrays , b->jarrays_size , rel1_al , rel2_al , temp_pred ,  result , joined , join_count , total_arrays );
 				//FREE//
+				free(cur2_rel);
+				free(result);
 			}
 			else  // CASE 8 : This means that left was filterd but not joined yet
 			{
 				// //BUILD RELATION FOR LEFT REL FROM FARRAYS//
-				 cur1_rel = build_relation_from_filtered(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				cur1_rel = build_relation_from_filtered(b->farrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
 				// //BUILD RELATION FOR RIGHT REL FROM JARRAYS//
 				// cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
-				 left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
-				 right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
-				 bucket_sort(cur1_rel, 0, left-1, 1 );
-				 bucket_sort(cur2_rel, 0, right-1, 1 );
-				 result = join ( cur1_rel , cur2_rel );
+				left = relation_getnumtuples( cur1_rel ); //total tuples in left relation
+				right = relation_getnumtuples( cur2_rel ); //total tuples in right relation
+				bucket_sort(cur1_rel, 0, left-1, 1 );
+				bucket_sort(cur2_rel, 0, right-1, 1 );
+				result = join ( cur1_rel , cur2_rel );
 				//FREE//
 			}
 

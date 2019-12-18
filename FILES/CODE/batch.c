@@ -168,7 +168,14 @@ void print_check_sums(Check_sums *cs, all_data *dt,Between *b)
         cur_res = b->jarrays[rel_al][res];
         sum += dt->table[rel_or]->columns[col]->tuples[cur_res].payload;
     }
-    printf("%d\t", sum);
+    if (sum == 0)
+    {
+      printf("NULL\t");
+    }else
+    {
+      printf("%d\t", sum);
+    }
+
     sum -= sum;
   }
   printf("\n");

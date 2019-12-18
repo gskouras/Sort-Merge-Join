@@ -74,9 +74,9 @@ relation_data *read_data_file(char *filename)
 	}
 
   reldata->numColumns = numofColumns;
-	printf("Relations %s has %ju colums", filename,reldata->numColumns);
+	//printf("Relations %s has %ju colums", filename,reldata->numColumns);
   reldata->numTuples = numofTuples;
-  printf(" and each column has %ju tuples\n",reldata->numTuples);
+  //printf(" and each column has %ju tuples\n",reldata->numTuples);
 
   
   //Filing the array of tuples with the elemenets of the file.
