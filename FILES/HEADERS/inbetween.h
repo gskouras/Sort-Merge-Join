@@ -17,6 +17,7 @@
 typedef struct {
 	int **farrays;
 	int **jarrays;
+	int *jarrays_size;
 } Between;
 
 //////////////
@@ -27,7 +28,7 @@ void execute_predicates(Predicates *pd, all_data *dt);
 
 Between *execute_join ( Predicates * , all_data * , Predicate * , Between *, int * , int * , int ) ;//Returns the jarrays updated after the join
 
-int **update_joined ( int ** , int , Predicate * , relation * , int * , int );
+int **update_joined ( int ** , int * , int , int , Predicate * , relation * , int * , int );
 
 int *execute_filter ( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
 
@@ -71,7 +72,7 @@ relation *build_relation_from_filtered( int *, all_data * , int , int );// Form 
 int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
 
 
-relation *build_relation_from_joined(int *, all_data * , int , int  );
+relation *build_relation_from_joined(int * , int *, all_data * , int , int , int  );
 
 int calc_tuples_size_to_build_rel_from_joined(int *, all_data * , int , int );
 
