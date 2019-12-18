@@ -281,7 +281,7 @@ void fill_check_sums(char* check_sums_str, Check_sums *cs, int *alias_array)
 
 int isnumber(char * number)
 {
-  if (strlen(number) > 2)
+  if (strlen(number) > 1)
   {
     return 1;
   }	

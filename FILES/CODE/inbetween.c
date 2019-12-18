@@ -170,7 +170,7 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			else // CASE 6 : This means that right was filtered but not joined yet
 			{ 
 				// //BUILD RELATION FOR LEFT REL FROM JARRAYS//
-				cur1_rel = build_relation(b->jarrays[temp_pred->rel1_alias], dt, rel1_no, rel1_col );
+				cur1_rel = build_relation_from_joined(b->jarrays[rel1_al] , b->jarrays_size , dt, rel1_no , rel1_al , rel1_col );
 				// //BUILD RELATION FOR RIGHT REL FROM FARRAYS//
 				cur2_rel = build_relation_from_filtered(b->farrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
 				// //SORTJOIN//
@@ -191,7 +191,7 @@ Between *execute_join ( Predicates *pd , all_data *dt , Predicate *temp_pred , B
 			if (flags[0] == 0 ) // CASE 7 : This means that left isnt filetered or joined
 			{ 
 				// //BUILD RELATION FOR RIGHT REL//
-				cur2_rel = build_relation(b->jarrays[temp_pred->rel2_alias], dt, rel2_no, rel2_col );
+				cur2_rel = build_relation_from_joined(b->jarrays[rel2_al] , b->jarrays_size , dt, rel2_no , rel2_al , rel2_col );
 				// //SORTJOIN//
 				left = relation_getnumtuples( dt->table[rel1_no]->columns[rel1_col] ); //total tuples in left relation
 				right = relation_getnumtuples( cur2_rel); //total tuples in right relation
