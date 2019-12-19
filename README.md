@@ -1,5 +1,5 @@
-## Software Development for Information Systems.-Project-1
- Ανάλυση λογισμικού για πληροφοριακά συστήματα Εργασία 1
+## Software Development for Information Systems.-Project-2
+ Ανάλυση λογισμικού για πληροφοριακά συστήματα Εργασία 2
 
 
 
