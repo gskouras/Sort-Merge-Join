@@ -1,5 +1,6 @@
 #include "../HEADERS/main.h"
 
+void check ( void );
 
 int main()
 { 
@@ -9,8 +10,9 @@ int main()
   all_data *datatable;
   datatable = create_data_table(rel_init);
 
- 	execute_all_batches("small.work", datatable);
+  execute_all_batches("small.work", datatable);
 
+  printf("REL2 TUPLES ARE %ld\n", datatable->table[2]->numTuples);
   //free_datatable(datatable);
 
 	return 0;

@@ -104,3 +104,12 @@ int isEqual(relation *rel_left, relation *rel_right, int i, int k)
 {
 	return rel_left->tuples[i].payload == rel_right->tuples[k].payload;
 }
+
+int isGreater ( relation *rel_left, relation *rel_right, int i, int k ) {
+	if ( rel_left->tuples[i].payload > rel_right->tuples[k].payload ) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}

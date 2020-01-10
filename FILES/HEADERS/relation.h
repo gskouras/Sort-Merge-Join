@@ -47,7 +47,9 @@ int relation_getnumtuples ( relation * ) ;
 
 int relation_checkifsorted ( relation *  ) ;
 
-int isEqual(relation *rel_left, relation *rel_right, int i, int k);
+int isEqual(relation * , relation * , int , int );
+
+int isGreater (relation * , relation * , int , int );
 
 void relation_print ( relation * ) ;
 

@@ -259,6 +259,7 @@ relation* join(relation *rel_left, relation *rel_right)
 	int right_total = rel_right->num_tuples;
 
 	int num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
+	int right_pos = 0 , restore = 0 ;
 
 	//printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
 	//printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
@@ -268,6 +269,40 @@ relation* join(relation *rel_left, relation *rel_right)
 	updated_rel->tuples = malloc(sizeof(tuple)*num_of_tuples);
 	updated_rel->num_tuples = num_of_tuples;
 
+	//printf("TOTAL TUPLES ARE %d\n", num_of_tuples);
+	
+	for ( int i = 0 ; i < left_total ; i++ ) { 
+
+		if ( isGreater ( rel_left , rel_right , i , right_pos ) ) {
+			right_pos++;
+			while ( isGreater ( rel_left , rel_right , i , right_pos ) && (right_pos < right_total) )  {
+				right_pos++;
+			}
+		}
+
+		if ( isEqual ( rel_left , rel_right , i , right_pos ) ) {
+			updated_rel->tuples[counter].payload = rel_left->tuples[i].key;
+			updated_rel->tuples[counter].key = rel_right->tuples[right_pos].key;
+			counter++;
+			right_pos++;
+			restore++;
+			while ( isEqual( rel_left , rel_right , i , right_pos ) && (right_pos < right_total) )  {
+				updated_rel->tuples[counter].payload = rel_left->tuples[i].key;
+				updated_rel->tuples[counter].key = rel_right->tuples[right_pos].key;
+				counter++;
+				right_pos++;
+				restore++;
+			}
+		}
+
+		if ( isEqual ( rel_left , rel_left , i , i+1 )) {
+			right_pos -= restore;
+		}
+
+		restore = 0 ;
+	}
+
+	/*
 	for ( int i = 0 ; i < left_total ; i++ ) {
 		cur_pos = prev_pos;
 		while ( cur_pos < right_total ) { //continue while loop when you find equal payloads after ecah other
@@ -293,7 +328,8 @@ relation* join(relation *rel_left, relation *rel_right)
 		flag1 = 0;
 		flag2 = 1;
 	}
-
+	
+	*/
 	return (updated_rel);
 }
 
@@ -308,7 +344,37 @@ int calc_tuples_size_after_join(relation *rel_left, relation *rel_right)
 	int flag1 = 0;
 	int flag2 = 1;
 	int counter = 0;
+	int right_pos = 0 , restore = 0 ;
 
+	
+	for ( int i = 0 ; i < left_total ; i++ ) { 
+
+		if ( isGreater ( rel_left , rel_right , i , right_pos ) ) {
+			right_pos++;
+			while ( isGreater ( rel_left , rel_right , i , right_pos ) && (right_pos < right_total) )  {
+				right_pos++;
+			}
+		}
+
+		if ( isEqual ( rel_left , rel_right , i , right_pos ) ) {
+			counter++;
+			right_pos++;
+			restore++;
+			while ( isEqual( rel_left , rel_right , i , right_pos ) && (right_pos < right_total) )  {
+				counter++;
+				right_pos++;
+				restore++;
+			}
+		}
+
+		if ( isEqual ( rel_left , rel_left , i , i+1 )) {
+			right_pos -= restore;
+		}
+
+		restore = 0 ;
+	}
+	
+	/*
 	for ( int i = 0 ; i < left_total ; i++ ) {
 		cur_pos = prev_pos;
 		while ( cur_pos < right_total ) { //continue while loop when you find equal payloads after ecah other
@@ -330,6 +396,7 @@ int calc_tuples_size_after_join(relation *rel_left, relation *rel_right)
 		flag1 = 0;
 		flag2 = 1;
 	}
-
+	*/
+	
 	return counter;	
 }

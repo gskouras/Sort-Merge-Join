@@ -1,8 +1,12 @@
 #include "../HEADERS/batch.h"
 #include "../HEADERS/inbetween.h"
 
-void print_check_sums(Check_sums * , all_data * , Between *);
 
+
+void print_check_sums( Check_sums *, all_data * , Between * );
+
+
+void check ( void );
 
 
 Batches * createBatches(char *filename, char *s)
@@ -74,7 +78,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 	//printf("%s\n",str);
 	fillBatches(batches, str, "small.work");
 
-  for (int i = 0; i < batches->size; ++i)
+  for (int i = 0; i < 1; ++i)
   {
     execute_batch(&batches->batches[i], datatable);
   }
@@ -88,7 +92,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 
 void execute_batch(Batch_lines * bl, all_data * datatable )
 {
-	for (int i = 0; i < bl->size; ++i)
+	for (int i = 0; i < 1; ++i)
 	{
 		execute_query(bl->batch[i], datatable);
 	}
@@ -136,8 +140,11 @@ void execute_query(char * query, all_data *datatable)
 
   fill_check_sums(check_sums_str, &check_sums, alias_array);//fill table of check_sums
 
+  //Between *b;
+  //b = execute_predicates(&predicates, datatable , b);
+
   Between *b;
-  b = execute_predicates(&predicates, datatable , b);
+  b = exec_preds ( &predicates , datatable , b ) ;
 
   print_check_sums( &check_sums, datatable , b);
   
@@ -148,38 +155,52 @@ void execute_query(char * query, all_data *datatable)
 
 }
 
-void print_check_sums(Check_sums *cs, all_data *dt,Between *b)
-{
-  relation *rel_to_print;
+
+void print_check_sums( Check_sums *c , all_data * datatable , Between *b ) {
+
+  //result_list_print_nodes ( b->r_list );
+
+  int size = c->size;
+  int rel_al ,rel_or , col_no;
+  int result_size = b->r_list->total_results;
+  int rowid;
   int sum = 0;
-  int result_size = b->jarrays_size[0];
-  int rel_al , rel_or;
-  int cur_res;
-  int visited[result_size];
-  int visited_count = 0;
-  int col;
+  for ( int i = 0 ; i < 1 ; i++ ) {
+    rel_al = c->check_sums_array[i].rel_alias;
+    rel_or = c->check_sums_array[i].rel_origin;
+    col_no = c->check_sums_array[i].rel_col;
 
-  for (int i = 0; i < cs->size ; i++)
-  {
-    rel_al = cs->check_sums_array[i].rel_alias;
-    rel_or = cs->check_sums_array[i].rel_origin;
-    col = cs->check_sums_array[i].rel_col;
-    for ( int res = 0 ; res < result_size ; res++ ) {
-        cur_res = b->jarrays[rel_al][res];
-        sum += dt->table[rel_or]->columns[col]->tuples[cur_res].payload;
+    for ( int j = 0 ; j < result_size ; j++){
+      rowid = result_list_get_rowid ( b->r_list , j , rel_al);
+      //printf("ROWID IS %d\n", rowid);
+      sum += datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload;
     }
-    if (sum == 0)
-    {
-      printf("NULL\t");
-    }else
-    {
-      printf("%d\t", sum);
-    }
-
-    sum -= sum;
+    //printf("SUM %d\n", sum);
+    sum = 0;
   }
-  printf("\n");
+  
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 void fill_relations(char *rel_str, int *alias_array)
 {
