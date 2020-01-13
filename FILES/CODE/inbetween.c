@@ -33,7 +33,7 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 	}
 	int *flags;
 	//Now execute the joins
-	for ( int i = 0 ; i < 3 ; i++ ) {
+	for ( int i = 0 ; i < psize ; i++ ) {
 		temp_pred = &pd->predicates_array[i];
 		if ( temp_pred->rel2_alias != -1 ) {
 			int rel1_alias = temp_pred->rel1_alias;
@@ -50,11 +50,10 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 
 
 	
-	result_list_print_nodes(b->r_list);
+	//result_list_print_nodes(b->r_list);
 	
 
 	free (flags);
-	printf("relation 0 has %d\n",datatable->table[0]->columns[0]->num_tuples );
 	return b;
 }
 
@@ -172,22 +171,28 @@ relation *build_relation_from_result_list ( result_list *r , all_data *datatable
 	int rowid;
 	int flag = 1;
 	int counter = 0;
-	for ( int i = 0 ; i < num_of_tuples ; i++ ) {
+
+	result_node *curr_node = r->root;
+	result_node *prev_node;
+
+	while ( curr_node != NULL ) {
 		if ( flag ) {
-			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
+			rowid = result_node_get_rowid ( curr_node , rel_alias ) ;
 			updated_rel->tuples[counter].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
 			updated_rel->tuples[counter].key = rowid; //KEY IS ROWID
 			counter++;
 			flag = 0;
 		}
 		else {
-			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
-			if ( rowid != result_list_get_rowid ( r , i-1 , rel_alias ) ) {
+			rowid = result_node_get_rowid ( curr_node , rel_alias ) ;
+			if ( rowid != result_node_get_rowid ( prev_node , rel_alias ) ) {
 				updated_rel->tuples[counter].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
 				updated_rel->tuples[counter].key = rowid; //KEY IS ROWID
 				counter++;
 			}
 		}
+		prev_node = curr_node;
+		curr_node = curr_node->next;
 	}
 	return updated_rel;
 }
@@ -198,17 +203,21 @@ int calculate_tuples_from_result_list ( result_list *r , all_data *datatable , i
 	int sum = 0;
 	int rowid;
 	int flag = 1;
-	for ( int i = 0 ; i < num_of_tuples ; i++ ) {
+	result_node *curr_node = r->root;
+	result_node *prev_node;
+	while ( curr_node != NULL ) {
 		if ( flag ) {
 			counter++;
 			flag = 0;
 		}
 		else {
-			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
-			if ( rowid != result_list_get_rowid ( r , i-1 , rel_alias ) ) {
+			rowid = result_node_get_rowid ( curr_node , rel_alias ) ;
+			if ( rowid != result_node_get_rowid ( prev_node , rel_alias ) ) {
 				counter++;
 			}
 		}
+		prev_node = curr_node;
+		curr_node = curr_node->next;
 	}
 	return counter;
 

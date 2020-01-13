@@ -118,8 +118,11 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 
 		if ( !found ) 
 		{
-			result_list_delete_node(r, pos);
+			if ( pos == 0 ) {
+				printf("ASDASDASD\n");
+			}
 		}
+
 
 		curr_node = next_node;
 		counter = 0;
