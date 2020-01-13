@@ -41,8 +41,9 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 			b = execute_join ( b , flags , temp_pred , datatable , total_rels );
 		}
 	}
-
 	free (flags);
+	//relation_print(datatable->table[0]->columns[0]);
+	printf("relation 0 has %d\n",datatable->table[0]->columns[0]->num_tuples );
 	return b;
 }
 
@@ -60,6 +61,7 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	col2_no = temp_pred->rel2_col;
 	relation *result;
 
+	
 	//This function returns a relation built from filtered if it was filterered or from the datatable if not
 	relation *r1 = prepare_relation ( b , datatable , rel1_origin , rel1_alias , col1_no , flags[0] ); 
 	relation *r2 = prepare_relation ( b , datatable , rel2_origin , rel2_alias , col2_no , flags[1] );
@@ -67,7 +69,8 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	b = between_update_result_list ( b , result , rel1_alias , rel2_alias , total_rels );
 
 	//result_list_print_nodes ( b->r_list );
-
+	relation_print(datatable->table[0]->columns[0]);
+	
 	free(r1);
 	free(r2);
 	free(result);
@@ -163,7 +166,8 @@ relation *build_relation_from_result_list ( result_list *r , all_data *datatable
 		updated_rel->tuples[i].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
 		updated_rel->tuples[i].key = rowid; //KEY IS ROWID
 	}
-
+	//relation_print(datatable->table[1]->columns[0]);
+	//relation_print(updated_rel);
 	return updated_rel;
 }
 
@@ -301,6 +305,7 @@ relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , 
 
 		}
 	}
+	//relation_print(dt->table[0]->columns[0]);
 	return updated_rel;
 }
 

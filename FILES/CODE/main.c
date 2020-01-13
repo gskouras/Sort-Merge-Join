@@ -10,9 +10,12 @@ int main()
   all_data *datatable;
   datatable = create_data_table(rel_init);
 
+  //relation_print(datatable->table[0]->columns[0]);
   execute_all_batches("small.work", datatable);
 
-  printf("REL2 TUPLES ARE %ld\n", datatable->table[2]->numTuples);
+  //relation_print(datatable->table[0]->columns[0]);
+  
+
   //free_datatable(datatable);
 
 	return 0;

@@ -1,3 +1,4 @@
+
 #include "../HEADERS/batch.h"
 #include "../HEADERS/inbetween.h"
 
@@ -140,15 +141,12 @@ void execute_query(char * query, all_data *datatable)
 
   fill_check_sums(check_sums_str, &check_sums, alias_array);//fill table of check_sums
 
-  //Between *b;
-  //b = execute_predicates(&predicates, datatable , b);
-
   Between *b;
   b = exec_preds ( &predicates , datatable , b ) ;
 
-  print_check_sums( &check_sums, datatable , b);
-  
-  free(b);
+  //print_check_sums( &check_sums, datatable , b);
+  //relation_print(datatable->table[0]->columns[0]);
+  //free(b);
   free(alias_array);
   free(predicates.predicates_array);
   free(check_sums.check_sums_array);
@@ -163,40 +161,35 @@ void print_check_sums( Check_sums *c , all_data * datatable , Between *b ) {
   int size = c->size;
   int rel_al ,rel_or , col_no;
   int result_size = b->r_list->total_results;
+  //printf("total results are %d\n",result_size );
   int rowid;
-  int sum = 0;
-  for ( int i = 0 ; i < 1 ; i++ ) {
+  long int sum = 0;
+
+  for ( int i = 0 ; i < size ; i++ ) {
     rel_al = c->check_sums_array[i].rel_alias;
     rel_or = c->check_sums_array[i].rel_origin;
     col_no = c->check_sums_array[i].rel_col;
 
     for ( int j = 0 ; j < result_size ; j++){
       rowid = result_list_get_rowid ( b->r_list , j , rel_al);
-      //printf("ROWID IS %d\n", rowid);
       sum += datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload;
+      //printf("bla %ld\n", datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload);
     }
-    //printf("SUM %d\n", sum);
+    
+
+    if (sum < 0)
+    {
+      printf("NULL\t");
+    }else
+    {
+    printf("%ld\t", sum);
     sum = 0;
+    }
+
   }
-  
+  //relation_print(datatable->table[0]->columns[0]);
+  printf("\n");
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

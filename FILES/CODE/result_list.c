@@ -1,3 +1,4 @@
+
 #include "../HEADERS/result_list.h"
 
 
@@ -54,38 +55,49 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 //RESULT LIST FUNCTIONS
 
 
-result_list *result_list_update (  result_list * r, relation * result , int rel_ref , int rel_add , int flag , int total_rels ) {
-	int total_results = relation_getnumtuples(result) ;
+result_list *result_list_update (  result_list * r, relation * result , int rel_ref , int rel_add , int flag , int total_rels )
+{
+	int total_results = relation_getnumtuples(result);
 	int found = 0;
 	int counter = 0;
-	int ref_value , add_value , compare_value;
-	result_node *add_node;
+	int pos = 0;
+	int ref_value , add_value , compare_value , next_cmp_value;
+	result_node *add_node ;
 
 	result_node *curr_node = r->root;
 	result_node *next_node;
 
-	while ( curr_node != NULL ) {
+	while ( curr_node != NULL ) 
+	{
 		next_node = curr_node->next;
 		ref_value = result_node_get_rowid ( curr_node , rel_ref );
-		for ( int i = 0 ; i < total_results ; i++ ) {
+		for ( int i = 0 ; i < total_results ; i++ ) 
+		{
 
-			if ( flag ) {
+			if ( flag ) 
+			{
 				add_value = result->tuples[i].key;
 				compare_value = result->tuples[i].payload;
+				next_cmp_value = result->tuples[i+1].payload;
 			}
-			else {
+			else 
+			{
 				add_value = result->tuples[i].payload;
 				compare_value = result->tuples[i].key;
+				next_cmp_value = result->tuples[i+1].key;
 			}
 
 			//printf("%ld %ld \n", result->tuples[i].payload , result->tuples[i].key);
 
-			if ( ref_value == compare_value ) {
-				if ( counter == 0 ) {
+			if ( ref_value == compare_value ) 
+			{
+				if ( counter == 0 ) 
+				{
 					result_node_set_rowid ( curr_node , rel_add , add_value );
 					counter++;
 				}
-				else{
+				else if(ref_value == compare_value  && ref_value == next_cmp_value)
+				{
 					add_node = result_node_clone ( curr_node , total_rels );
 					r->total_results++;
 					result_node_set_rowid ( add_node , rel_add , add_value );
@@ -96,19 +108,24 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 				}
 				found = 1;
 			}
+
 		}
 
-		if ( !found ) {
-			result_node_delete_node ( curr_node );
+		if ( !found ) 
+		{
+			result_list_delete_node(r, pos);
 		}
 
-		curr_node = next_node;
+		curr_node = curr_node->next;
 		counter = 0;
 		found = 0;
+		pos++;
 	}
-
+	//result_list_print_nodes(r);
 	return r;
 }
+
+
 
 result_list *result_list_fill_empty ( result_list *r , relation *result , int rel_left , int rel_right  , int total_rels ) {
 	int total_results = relation_getnumtuples(result) ;
@@ -118,6 +135,7 @@ result_list *result_list_fill_empty ( result_list *r , relation *result , int re
 		result_list_set_rowid ( r , node_pos-1, rel_left , result->tuples[i].payload );
 		result_list_set_rowid ( r , node_pos-1, rel_right , result->tuples[i].key );
 	}
+	//result_list_print_nodes(r);
 	return r;
 }
 
@@ -152,6 +170,7 @@ void result_list_delete_node ( result_list *r , int node_pos ) {
 		r->root = r->root->next;
 		result_node_delete_node ( curr_node );
 		free(curr_node);
+		r->total_results--;
 	}
 	else {
 		while ( counter != node_pos ) {
@@ -179,14 +198,12 @@ int result_list_count_nodes ( result_list *r ){
 
 void result_list_print_nodes ( result_list *r ) {
 	result_node *curr_node = r->root;
-	int counter = 0;
-	while ( curr_node != NULL && counter < 1000 ) {
+	while ( curr_node != NULL ) {
 		for ( int i = 0 ; i < curr_node->total_rels ; i++ ) {
 			printf("REL%d rid %d ", i , curr_node->rels[i] );
 		}
 		printf("\n");
 		curr_node = curr_node->next;
-		counter++;
 	}
 }
 
