@@ -79,7 +79,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 	//printf("%s\n",str);
 	fillBatches(batches, str, "small.work");
 
-  for (int i = 0; i < 1; ++i)
+  for (int i = 0; i < batches->size; ++i)
   {
     execute_batch(&batches->batches[i], datatable);
   }
@@ -93,7 +93,7 @@ void execute_all_batches(char *filename, all_data *datatable)
 
 void execute_batch(Batch_lines * bl, all_data * datatable )
 {
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 1 ; ++i)
 	{
 		execute_query(bl->batch[i], datatable);
 	}
@@ -143,10 +143,10 @@ void execute_query(char * query, all_data *datatable)
 
   Between *b;
   b = exec_preds ( &predicates , datatable , b ) ;
-
-  //print_check_sums( &check_sums, datatable , b);
-  //relation_print(datatable->table[0]->columns[0]);
-  //free(b);
+  //result_list_print_nodes(b->r_list);
+  print_check_sums( &check_sums, datatable , b);
+  
+  free(b);
   free(alias_array);
   free(predicates.predicates_array);
   free(check_sums.check_sums_array);
@@ -158,36 +158,35 @@ void print_check_sums( Check_sums *c , all_data * datatable , Between *b ) {
 
   //result_list_print_nodes ( b->r_list );
 
+
+
   int size = c->size;
   int rel_al ,rel_or , col_no;
   int result_size = b->r_list->total_results;
   //printf("total results are %d\n",result_size );
   int rowid;
   long int sum = 0;
+  int flag = 1;
 
   for ( int i = 0 ; i < size ; i++ ) {
+
+    if ( b->r_list->root == NULL ){
+      printf("NULL\t");
+      flag = 0;
+    }
     rel_al = c->check_sums_array[i].rel_alias;
     rel_or = c->check_sums_array[i].rel_origin;
     col_no = c->check_sums_array[i].rel_col;
 
-    for ( int j = 0 ; j < result_size ; j++){
-      rowid = result_list_get_rowid ( b->r_list , j , rel_al);
-      sum += datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload;
-      //printf("bla %ld\n", datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload);
-    }
+    sum = between_get_sum ( b , datatable , rel_or , rel_al , col_no );
     
 
-    if (sum < 0)
-    {
-      printf("NULL\t");
-    }else
-    {
+   if ( flag ) {
     printf("%ld\t", sum);
     sum = 0;
     }
 
   }
-  //relation_print(datatable->table[0]->columns[0]);
   printf("\n");
 }
 

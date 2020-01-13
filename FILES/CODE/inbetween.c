@@ -3,6 +3,7 @@
 
 
 Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
+
 	int psize = pd->size;
 	int *cur_array;
 	int fflag;
@@ -32,17 +33,27 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 	}
 	int *flags;
 	//Now execute the joins
-	for ( int i = 0 ; i < psize ; i++ ) {
+	for ( int i = 0 ; i < 3 ; i++ ) {
 		temp_pred = &pd->predicates_array[i];
 		if ( temp_pred->rel2_alias != -1 ) {
 			int rel1_alias = temp_pred->rel1_alias;
 			int rel2_alias = temp_pred->rel2_alias;
 			flags = generate_flags ( flags , filtered , filter_count , rel1_alias , rel2_alias );
-			b = execute_join ( b , flags , temp_pred , datatable , total_rels );
+			if ( i > 0 && b->r_list->root != NULL ){
+				b = execute_join ( b , flags , temp_pred , datatable , total_rels );
+			}
+			else if ( i == 0 ) {
+				b = execute_join ( b , flags , temp_pred , datatable , total_rels );
+			}
 		}
 	}
+
+
+	
+	result_list_print_nodes(b->r_list);
+	
+
 	free (flags);
-	//relation_print(datatable->table[0]->columns[0]);
 	printf("relation 0 has %d\n",datatable->table[0]->columns[0]->num_tuples );
 	return b;
 }
@@ -61,19 +72,16 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	col2_no = temp_pred->rel2_col;
 	relation *result;
 
-	
 	//This function returns a relation built from filtered if it was filterered or from the datatable if not
 	relation *r1 = prepare_relation ( b , datatable , rel1_origin , rel1_alias , col1_no , flags[0] ); 
 	relation *r2 = prepare_relation ( b , datatable , rel2_origin , rel2_alias , col2_no , flags[1] );
+
 	result = join ( r1 , r2 );
 	b = between_update_result_list ( b , result , rel1_alias , rel2_alias , total_rels );
-
-	//result_list_print_nodes ( b->r_list );
-	relation_print(datatable->table[0]->columns[0]);
 	
-	free(r1);
-	free(r2);
-	free(result);
+	//free(r1);
+	//free(r2);
+	//free(result);
 	return b;
 }
 
@@ -156,21 +164,67 @@ relation *build_relation_from_result_list ( result_list *r , all_data *datatable
 
 	
 	int num_of_tuples = r->total_results;
+	int final_size = calculate_tuples_from_result_list ( r , datatable , rel_alias , rel_origin , col_no );
 	relation *updated_rel = malloc(sizeof(relation));
-	updated_rel->tuples = malloc(sizeof(tuple) * num_of_tuples);
-	updated_rel->num_tuples = num_of_tuples;
+	updated_rel->tuples = malloc(sizeof(tuple) * final_size);
+	updated_rel->num_tuples = final_size;
 
 	int rowid;
+	int flag = 1;
+	int counter = 0;
 	for ( int i = 0 ; i < num_of_tuples ; i++ ) {
-		rowid = result_list_get_rowid ( r , i , rel_alias ) ;
-		updated_rel->tuples[i].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
-		updated_rel->tuples[i].key = rowid; //KEY IS ROWID
+		if ( flag ) {
+			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
+			updated_rel->tuples[counter].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
+			updated_rel->tuples[counter].key = rowid; //KEY IS ROWID
+			counter++;
+			flag = 0;
+		}
+		else {
+			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
+			if ( rowid != result_list_get_rowid ( r , i-1 , rel_alias ) ) {
+				updated_rel->tuples[counter].payload = datatable->table[rel_origin]->columns[col_no]->tuples[rowid].payload;//PAYLOAD IS VALUE
+				updated_rel->tuples[counter].key = rowid; //KEY IS ROWID
+				counter++;
+			}
+		}
 	}
-	//relation_print(datatable->table[1]->columns[0]);
-	//relation_print(updated_rel);
 	return updated_rel;
 }
 
+int calculate_tuples_from_result_list ( result_list *r , all_data *datatable , int rel_alias , int rel_origin , int col_no ) {
+	int num_of_tuples = r->total_results;
+	int counter = 0;
+	int sum = 0;
+	int rowid;
+	int flag = 1;
+	for ( int i = 0 ; i < num_of_tuples ; i++ ) {
+		if ( flag ) {
+			counter++;
+			flag = 0;
+		}
+		else {
+			rowid = result_list_get_rowid ( r , i , rel_alias ) ;
+			if ( rowid != result_list_get_rowid ( r , i-1 , rel_alias ) ) {
+				counter++;
+			}
+		}
+	}
+	return counter;
+
+}
+
+int between_get_sum ( Between *b , all_data *datatable , int rel_or , int rel_al , int col_no) {
+	result_node *curr_node = b->r_list->root;
+	int rowid;
+	int sum = 0;
+	while( curr_node != NULL ) {
+		rowid = curr_node->rels[rel_al];
+		sum += datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload;
+		curr_node = curr_node->next;
+	}
+	return sum;
+}
 
 //FILTERS
 
@@ -197,7 +251,7 @@ int *execute_filter( Predicates * pd , all_data * dt , Predicate * temp_pred , i
 	{
 		lesser_filter ( dt , result , temp_pred );
 	}
-	else 
+	else if (op == '=' )
 	{
 		equal_filter ( dt , result , temp_pred );
 	}
@@ -305,7 +359,6 @@ relation * build_relation_from_filtered(int * array, all_data *dt, int rel_no , 
 
 		}
 	}
-	//relation_print(dt->table[0]->columns[0]);
 	return updated_rel;
 }
 

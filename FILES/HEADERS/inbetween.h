@@ -35,6 +35,8 @@ int between_check_if_joined ( Between * , int );
 
 relation *build_relation_from_result_list ( result_list * , all_data * , int , int , int );
 
+int calculate_tuples_from_result_list ( result_list * , all_data * , int , int , int );
+
 //FILTERS
 
 int *execute_filter ( Predicates * , all_data * , Predicate * , int * ) ; //Returns array of the rowids remaining after filter
@@ -50,6 +52,8 @@ int check_if_filtered ( int * , int , int ); //Check if a relation has been filt
 relation *build_relation_from_filtered( int *, all_data * , int , int );// Form a relation from
 
 int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
+
+int between_get_sum ( Between * , all_data * , int , int , int ); 
 
 //OTHERS
 

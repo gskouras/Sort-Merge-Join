@@ -270,8 +270,8 @@ relation* join(relation *rel_left, relation *rel_right)
 	updated_rel->num_tuples = num_of_tuples;
 
 	//printf("TOTAL TUPLES ARE %d\n", num_of_tuples);
-	
 	for ( int i = 0 ; i < left_total ; i++ ) { 
+		//printf("%d\n", rel_left->tuples[i].key);
 
 		if ( isGreater ( rel_left , rel_right , i , right_pos ) ) {
 			right_pos++;
@@ -296,6 +296,7 @@ relation* join(relation *rel_left, relation *rel_right)
 		}
 
 		if ( isEqual ( rel_left , rel_left , i , i+1 )) {
+			//printf("ASDASDA\n");
 			right_pos -= restore;
 		}
 
@@ -330,6 +331,8 @@ relation* join(relation *rel_left, relation *rel_right)
 	}
 	
 	*/
+
+	//relation_print(updated_rel);
 	return (updated_rel);
 }
 

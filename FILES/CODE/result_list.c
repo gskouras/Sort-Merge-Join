@@ -54,7 +54,6 @@ int in_used_relation ( int *array , int count , int rel_no ) {
 
 //RESULT LIST FUNCTIONS
 
-
 result_list *result_list_update (  result_list * r, relation * result , int rel_ref , int rel_add , int flag , int total_rels )
 {
 	int total_results = relation_getnumtuples(result);
@@ -71,6 +70,11 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 	{
 		next_node = curr_node->next;
 		ref_value = result_node_get_rowid ( curr_node , rel_ref );
+		//printf("%d\n",ref_value );
+		//for ( int i = 0 ; i < total_results ; i++ ) 
+		//{
+		//	printf("LEFT IS %ld RIGHT IS %ld\n",result->tuples[i].payload,result->tuples[i].key);
+		//}
 		for ( int i = 0 ; i < total_results ; i++ ) 
 		{
 
@@ -96,15 +100,16 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 					result_node_set_rowid ( curr_node , rel_add , add_value );
 					counter++;
 				}
-				else if(ref_value == compare_value  && ref_value == next_cmp_value)
+				else
 				{
 					add_node = result_node_clone ( curr_node , total_rels );
 					r->total_results++;
 					result_node_set_rowid ( add_node , rel_add , add_value );
-					add_node->next = curr_node->next;
+					add_node->next = next_node;
 					curr_node->next = add_node;
 					curr_node = add_node;
 					counter++;
+					pos++;
 				}
 				found = 1;
 			}
@@ -116,12 +121,11 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 			result_list_delete_node(r, pos);
 		}
 
-		curr_node = curr_node->next;
+		curr_node = next_node;
 		counter = 0;
 		found = 0;
 		pos++;
 	}
-	//result_list_print_nodes(r);
 	return r;
 }
 

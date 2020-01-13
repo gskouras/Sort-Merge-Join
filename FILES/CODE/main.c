@@ -12,7 +12,7 @@ int main()
 
   //relation_print(datatable->table[0]->columns[0]);
   execute_all_batches("small.work", datatable);
-
+  //check();
   //relation_print(datatable->table[0]->columns[0]);
   
 
