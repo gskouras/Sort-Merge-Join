@@ -10,13 +10,9 @@ int main()
   all_data *datatable;
   datatable = create_data_table(rel_init);
 
-  //relation_print(datatable->table[0]->columns[0]);
   execute_all_batches("small.work", datatable);
-  //check();
-  //relation_print(datatable->table[0]->columns[0]);
-  
 
-  //free_datatable(datatable);
+  free_datatable(datatable);
 
 	return 0;
 }
@@ -55,6 +51,9 @@ relation_data *read_data_file(char *filename)
 	uint64_t numofTuples;
 	uint64_t numofColumns;
 	uint64_t num = 0;
+  int sum,max,min;
+  int size_of_d_table;
+  int average;
 
 
 	FILE *fp = fopen(filename, "r");
@@ -79,23 +78,71 @@ relation_data *read_data_file(char *filename)
 	}
 
   reldata->numColumns = numofColumns;
-	//printf("Relations %s has %ju colums", filename,reldata->numColumns);
+	printf("\nRelation %s has %ju colums", filename,reldata->numColumns);
   reldata->numTuples = numofTuples;
-  //printf(" and each column has %ju tuples\n",reldata->numTuples);
+  printf(" and each column has %ju tuples\n",reldata->numTuples);
 
   
   //Filing the array of tuples with the elemenets of the file.
+  char c;
   for(int i=0;i<numofColumns;i++)
   {	
+    printf("\nColumn %d Statistics:\t",i);
+    reldata->columns[i]->l = 99999999; //arxikopoihsh se enan megalo arithmo
+    reldata->columns[i]->u = 0;
+    reldata->columns[i]->f=numofTuples;
+    reldata->columns[i]->d=0;
+    reldata->columns[i]->restored=0;//this is used as a flag when restoring to its original specifications
+    
     for(int j=0;j<numofTuples;j++)
     {
       	fread(&(num),sizeof(uint64_t),1,fp);
       	reldata->columns[i]->tuples[j].payload=num;
-      	reldata->columns[i]->tuples[j].key = j;  
-      }
-      //printf("total tuples of relation %s columns %d are %d \n", filename, i, reldata->columns[i]->num_tuples);
-  }
+      	reldata->columns[i]->tuples[j].key = j;
 
+        if (num<reldata->columns[i]->l)
+          reldata->columns[i]->l=num;
+
+        if (num>reldata->columns[i]->u)
+          reldata->columns[i]->u=num;
+
+    }
+
+    size_of_d_table = (int)reldata->columns[i]->u-(int)reldata->columns[i]->l+1;
+      
+      if (size_of_d_table<M)
+      {
+        reldata->columns[i]->d_table = (char*)calloc(size_of_d_table,sizeof(char));
+        
+        for(int j=0;j<numofTuples;j++)
+        {
+          num = reldata->columns[i]->tuples[j].payload;
+          int pos = (int)num - (int)reldata->columns[i]->l;
+          reldata->columns[i]->d_table[pos]= 1;
+        }
+      }
+      else
+      {
+        reldata->columns[i]->d_table = (char*)calloc(M,sizeof(char));
+        
+        for(int j=0;j<numofTuples;j++)
+        {
+          num = reldata->columns[i]->tuples[j].payload;
+          int pos = (int)num - (int)reldata->columns[i]->l;
+          reldata->columns[i]->d_table[(pos)%M]= 1;
+          }
+        size_of_d_table = M;
+       }
+
+      for(int x=0;x<size_of_d_table;x++)
+      {
+        if (reldata->columns[i]->d_table[x]==1)
+          (reldata->columns[i]->d)++;
+      }
+    
+    printf("Low: %ju | Upper %ju | Num Values %f | Distinct Values %f \t",reldata->columns[i]->l,reldata->columns[i]->u,reldata->columns[i]->f,reldata->columns[i]->d);
+  }
+  printf("\n");
   return reldata;
 }
 
@@ -112,14 +159,20 @@ FILE *initialize_file()
 }
 
 
-// void free_datatable(all_data * dt)
-// {
-//   for (int i = 0; i < dt->num_relations; i++)
-//   { 
-//         free(dt->table[i]->columns[i]->tuples);
-//   }
-//   free(dt->table);
-//   free(dt);
-// }
+void free_datatable(all_data * datatable)
+{
+  for(int i=0;i<datatable->num_relations;i++)
+  {
+    for(int j=0;j<datatable->table[i]->numColumns;j++)
+    {
+      free(datatable->table[i]->columns[j]->tuples);
+      free(datatable->table[i]->columns[j]);
+    }
+    free(datatable->table[i]->columns);
+    free(datatable->table[i]);
+  }
+  free(datatable->table);
+  free(datatable);
+}
 
 

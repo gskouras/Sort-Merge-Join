@@ -84,6 +84,12 @@ void fill_check_sums(char *check_sum_str, Check_sums *cs, int * alias_array);///
 
 int isnumber(char * number); //checking if a given string is number
 
+float instead_of_pow(float a, float b);
+
+void restore_statistics (relation_data ** relations, int rel);
+
+float update_statistics(relation_data ** relations, Predicate ** predicate, int pred_num);
+
 
 
 

@@ -7,6 +7,16 @@
 typedef struct relation {
 	tuple *tuples;
 	int num_tuples;
+	uint64_t l;//minimum value
+  	uint64_t u;//maximum value
+  	float f;//number of values
+  	float d;//number of distinct values
+  	char * d_table;//used for finding the d
+  	uint64_t prev_l;//used for restoring the previous value when we create the exec trees
+  	uint64_t prev_u;//used for restoring the previous value when we create exec _TREES_H__
+  	float prev_f;// ""
+ 	float prev_d;// ""
+  	char restored;
 } relation ;
 
 
@@ -54,6 +64,7 @@ int isGreater (relation * , relation * , int , int );
 void relation_print ( relation * ) ;
 
 void relation_free ( relation * ) ;
+
 
 
 

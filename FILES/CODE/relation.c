@@ -113,3 +113,4 @@ int isGreater ( relation *rel_left, relation *rel_right, int i, int k ) {
 		return 0;
 	}
 }
+

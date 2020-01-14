@@ -1,10 +1,7 @@
-all: main.o tuple.o relation.o batch.o sort_join.o check.o result_list.o inbetween.o
-	gcc  -o EXEC/sort_join main.o tuple.o relation.o batch.o sort_join.o check.o result_list.o inbetween.o -g -lm 
+all: main.o tuple.o relation.o batch.o sort_join.o result_list.o inbetween.o
+	gcc  -o EXEC/sort_join main.o tuple.o relation.o batch.o sort_join.o  result_list.o inbetween.o -g -lm 
 main.o: FILES/CODE/main.c 
 	gcc -c  FILES/CODE/main.c
-
-check.o: FILES/CODE/check.c
-	gcc -c FILES/CODE/check.c
 
 inbetween.o: FILES/CODE/inbetween.c
 	gcc -c FILES/CODE/inbetween.c

@@ -70,15 +70,17 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	col2_no = temp_pred->rel2_col;
 	relation *result;
 
-	//This function returns a relation built from filtered if it was filterered or from the datatable if not
+	//This function returns a relation built from filtered (or joined) if it was filterered(or joined) or from the datatable if not
 	relation *r1 = prepare_relation ( b , datatable , rel1_origin , rel1_alias , col1_no , flags[0] ); 
 	relation *r2 = prepare_relation ( b , datatable , rel2_origin , rel2_alias , col2_no , flags[1] );
 
-	if ( rel1_origin != rel2_origin ) {
+	if ( rel1_origin != rel2_origin )
+	{
 		result = join ( r1 , r2 );
 	}
-	else {
-		printf("SELFJOINNNNNN\t");
+	else if ( rel1_origin == rel2_origin)
+	{
+		printf("SELF JOIN\t");
 	}
 
 	b = between_update_result_list ( b , result , rel1_alias , rel2_alias , total_rels );
@@ -122,6 +124,7 @@ Between *between_update_result_list ( Between *b , relation *result , int rel_le
 
 relation *prepare_relation ( Between *b , all_data *datatable ,int rel_origin , int rel_alias , int col_no , int flag ) {
 	relation *to_return;
+
 	if ( b->r_list->root == NULL ) { //This means this relation hasnt been joined
 		if (flag == 1) { //This means that the realtion was filtered
 			to_return = build_relation_from_filtered ( b->farrays[rel_alias] , datatable , rel_origin, col_no );
@@ -129,7 +132,7 @@ relation *prepare_relation ( Between *b , all_data *datatable ,int rel_origin , 
 			bucket_sort ( to_return , 0 , num_tuples - 1 , 1 );
 			return to_return;
 		}
-		else { 
+		else { //This means that the relation hasn't been joined nor filtered
 			to_return = datatable->table[rel_origin]->columns[col_no];
 			int num_tuples = relation_getnumtuples( to_return ); //total tuples in relation
 			bucket_sort ( to_return , 0 , num_tuples - 1 , 1 );
@@ -144,13 +147,13 @@ relation *prepare_relation ( Between *b , all_data *datatable ,int rel_origin , 
 			return to_return;
 		}
 		else {
-			if (flag == 1) { //This means that the realtion was filtered
+			if (flag == 1) { //This means that the relation was filtered and already joined 
 				to_return = build_relation_from_filtered ( b->farrays[rel_alias] , datatable , rel_origin, col_no );
 				int num_tuples = relation_getnumtuples( to_return ); //total tuples in relation
 				bucket_sort ( to_return , 0 , num_tuples - 1 , 1 );
 				return to_return;
 			}
-			else {
+			else { //This means that the relation hasn't been joined or filtered
 				to_return = datatable->table[rel_origin]->columns[col_no];
 				int num_tuples = relation_getnumtuples( to_return ); //total tuples in relation
 				bucket_sort ( to_return , 0 , num_tuples - 1 , 1 );
