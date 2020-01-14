@@ -100,7 +100,7 @@ void relation_free ( relation *rel ) {
 	free (rel->tuples);
 }
 
-int isEqual(relation *rel_left, relation *rel_right, int i, int k)
+int isEqual(relation *rel_left, relation *rel_right, uint64_t i, uint64_t k)
 {
 	return rel_left->tuples[i].payload == rel_right->tuples[k].payload;
 }

@@ -165,9 +165,9 @@ void print_check_sums( Check_sums *c , all_data * datatable , Between *b ) {
   int result_size = b->r_list->total_results;
   //printf("total results are %d\n",result_size );
   int rowid;
-  long int sum = 0;
+  uint64_t sum = 0;
   int flag = 1;
-
+;
   for ( int i = 0 ; i < size ; i++ ) {
 
     if ( b->r_list->root == NULL ){

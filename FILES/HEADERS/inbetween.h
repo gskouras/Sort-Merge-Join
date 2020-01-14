@@ -53,7 +53,7 @@ relation *build_relation_from_filtered( int *, all_data * , int , int );// Form 
 
 int calc_tuples_size_to_build_rel_from_filtered( int * , all_data * , int , int ); //calculate number of tuples ne need to malloc in build_relation()
 
-int between_get_sum ( Between * , all_data * , int , int , int ); 
+uint64_t between_get_sum ( Between * , all_data * , int , int , int ); 
 
 //OTHERS
 

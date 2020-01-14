@@ -8,10 +8,10 @@
 
 
 
-int calculate_relations ( Predicates *pd ) 
+uint64_t calculate_relations ( Predicates *pd ) 
 {
 	int used[pd->size];
-	int count = 0 ;
+	uint64_t count = 0 ;
 	int rel1,rel2; //Here we store the rel origin
 	int flag ;
 
@@ -65,6 +65,7 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 
 	result_node *curr_node = r->root;
 	result_node *next_node;
+	result_node *prev_node = r->root;
 
 	while ( curr_node != NULL ) 
 	{
@@ -119,15 +120,26 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 		if ( !found ) 
 		{
 			if ( pos == 0 ) {
-				printf("ASDASDASD\n");
+				r->root = next_node;
+				//free curr node
+				curr_node = next_node;
+				prev_node = next_node;
+			}
+			else {
+				prev_node->next =next_node;
+				curr_node = next_node;
+				counter = 0;
+				found = 0;
+				pos++;
 			}
 		}
-
-
-		curr_node = next_node;
-		counter = 0;
-		found = 0;
-		pos++;
+		else {
+			prev_node = curr_node;
+			curr_node = next_node;
+			counter = 0;
+			found = 0;
+			pos++;
+		}
 	}
 	return r;
 }
@@ -136,13 +148,25 @@ result_list *result_list_update (  result_list * r, relation * result , int rel_
 
 result_list *result_list_fill_empty ( result_list *r , relation *result , int rel_left , int rel_right  , int total_rels ) {
 	int total_results = relation_getnumtuples(result) ;
-	for ( int i = 0 ; i < total_results ; i++ ) {
-		r = result_list_add_node ( total_rels , r );
-		int node_pos = r->total_results;
-		result_list_set_rowid ( r , node_pos-1, rel_left , result->tuples[i].payload );
-		result_list_set_rowid ( r , node_pos-1, rel_right , result->tuples[i].key );
+	int i = 1;
+	if ( total_results > 0 ) {//IF WE HAVE ANY RESULTS
+	//FIRST CREATE THE ROOT
+	r->root = create_result_node ( r->root , total_rels );
+	result_node_set_rowid ( r->root , rel_left , result->tuples[0].payload );
+	result_node_set_rowid ( r->root , rel_right , result->tuples[0].key );
+	result_node *curr_node = r->root;
+	r->total_results++;
+	while ( i < total_results ) {
+		curr_node->next = create_result_node ( curr_node->next , total_rels );
+		result_node_set_rowid ( curr_node->next , rel_left , result->tuples[i].payload );
+		result_node_set_rowid ( curr_node->next , rel_right , result->tuples[i].key );
+		r->total_results++;
+		curr_node = curr_node->next;
+		i++;
 	}
-	//result_list_print_nodes(r);
+	}
+
+	//result_list_print_nodes (r);
 	return r;
 }
 

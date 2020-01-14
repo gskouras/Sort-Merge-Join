@@ -8,7 +8,7 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 	int *cur_array;
 	int fflag;
 	//First calculate how many relations we are going to use
-	int total_rels = calculate_relations ( pd );
+	uint64_t total_rels = calculate_relations ( pd );
 	b = create_between ( b , total_rels);
 
 	int filtered[total_rels]; //Keep which rels we filtered
@@ -58,7 +58,6 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 }
 
 
-
 //JOINS
 
 Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_data *datatable , int total_rels ) {
@@ -75,7 +74,13 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	relation *r1 = prepare_relation ( b , datatable , rel1_origin , rel1_alias , col1_no , flags[0] ); 
 	relation *r2 = prepare_relation ( b , datatable , rel2_origin , rel2_alias , col2_no , flags[1] );
 
-	result = join ( r1 , r2 );
+	if ( rel1_origin != rel2_origin ) {
+		result = join ( r1 , r2 );
+	}
+	else {
+		printf("SELFJOINNNNNN\t");
+	}
+
 	b = between_update_result_list ( b , result , rel1_alias , rel2_alias , total_rels );
 	
 	//free(r1);
@@ -161,7 +166,6 @@ int between_check_if_joined ( Between *b , int rel_no ) {
 
 relation *build_relation_from_result_list ( result_list *r , all_data *datatable , int rel_alias , int rel_origin , int col_no ) {
 
-	
 	int num_of_tuples = r->total_results;
 	int final_size = calculate_tuples_from_result_list ( r , datatable , rel_alias , rel_origin , col_no );
 	relation *updated_rel = malloc(sizeof(relation));
@@ -223,10 +227,10 @@ int calculate_tuples_from_result_list ( result_list *r , all_data *datatable , i
 
 }
 
-int between_get_sum ( Between *b , all_data *datatable , int rel_or , int rel_al , int col_no) {
+uint64_t between_get_sum ( Between *b , all_data *datatable , int rel_or , int rel_al , int col_no) {
 	result_node *curr_node = b->r_list->root;
 	int rowid;
-	int sum = 0;
+	uint64_t sum = 0;
 	while( curr_node != NULL ) {
 		rowid = curr_node->rels[rel_al];
 		sum += datatable->table[rel_or]->columns[col_no]->tuples[rowid].payload;

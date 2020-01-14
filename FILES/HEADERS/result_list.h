@@ -29,7 +29,7 @@ typedef struct {
 
 //OTHERS
 
-int calculate_relations ( Predicates * ); //return how many relations we are going to use
+uint64_t calculate_relations ( Predicates * ); //return how many relations we are going to use
 
 int in_used_relation ( int * , int , int ); //Check if already used
 

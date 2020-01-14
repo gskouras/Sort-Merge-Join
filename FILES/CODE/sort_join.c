@@ -259,7 +259,7 @@ relation* join(relation *rel_left, relation *rel_right)
 	int right_total = rel_right->num_tuples;
 
 	int num_of_tuples = calc_tuples_size_after_join(rel_left, rel_right);
-	int right_pos = 0 , restore = 0 ;
+	uint64_t right_pos = 0 , restore = 0 ;
 
 	//printf("num tuples before join of left relation are %d\n", rel_left->num_tuples);
 	//printf("num tuples before join of right relation are %d\n", rel_right->num_tuples);
@@ -270,7 +270,7 @@ relation* join(relation *rel_left, relation *rel_right)
 	updated_rel->num_tuples = num_of_tuples;
 
 	//printf("TOTAL TUPLES ARE %d\n", num_of_tuples);
-	for ( int i = 0 ; i < left_total ; i++ ) { 
+	for ( uint64_t i = 0 ; i < left_total ; i++ ) { 
 		//printf("%d\n", rel_left->tuples[i].key);
 
 		if ( isGreater ( rel_left , rel_right , i , right_pos ) ) {
