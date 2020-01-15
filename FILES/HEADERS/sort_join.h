@@ -1,7 +1,7 @@
 #ifndef _SORT_JOIN_H_
 #define _SORT_JOIN_H_
 
-#include "../HEADERS/main.h"
+#include "../HEADERS/relation.h"
 
 
 

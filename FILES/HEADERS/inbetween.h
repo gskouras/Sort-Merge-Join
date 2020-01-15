@@ -7,7 +7,6 @@
 #include <ctype.h>
 #include <strings.h>
 #include "../HEADERS/relation.h"
-#include "../HEADERS/batch.h"
 #include "../HEADERS/sort_join.h"
 #include "../HEADERS/result_list.h"
 

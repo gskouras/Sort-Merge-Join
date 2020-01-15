@@ -10,7 +10,10 @@ int main()
   all_data *datatable;
   datatable = create_data_table(rel_init);
 
-  execute_all_batches("small.work", datatable);
+  //THREADPOOL INIT
+  threadpool *thp;
+
+  execute_all_batches_threads ( "small.work" , datatable  , thp );
 
   free_datatable(datatable);
 

@@ -1,5 +1,5 @@
-#ifndef _BATCH_H
-#define _BATCH_H
+#ifndef _QUERY_H
+#define _QUERY_H
 
 #include <stdio.h>
 #include <string.h>
@@ -9,22 +9,7 @@
 #include <strings.h>
 #include "../HEADERS/relation.h"
 
-
-
-
-typedef struct
-{
-	char **batch; //pointer to each query of a bach
-	int size; // size of each bach
-} Batch_lines;
-
-
-typedef struct
-{
-	Batch_lines *batches; //pointer to each bach
-	int size; //size of all batches
-} Batches;
-
+#define M 5000000
 
 typedef struct 
 {	
@@ -60,17 +45,6 @@ typedef struct
  }Check_sums;
 
 
-void fillBatches(Batches *batches, char *s, char *filename);
-
-void free_all_batches(Batches * batches); // free all memory allocated to hold the information for batches
-
-Batches * createBatches(char *filename, char *s);
-
-void execute_all_batches(char* filename, all_data * datatable); //read all batched from the file
-
-void execute_batch(Batch_lines * batch_lines, all_data * datatable ); //execute each batch seperately
-
-void execute_query(char * query, all_data *datatable); //execute each query seperately
 
 int find_num_of_relations(char * rel_line); //calculating number of relations participating in a query
 
@@ -89,11 +63,5 @@ float instead_of_pow(float a, float b);
 void restore_statistics (relation_data ** relations, int rel);
 
 float update_statistics(relation_data ** relations, Predicate ** predicate, int pred_num);
-
-
-
-
-
-
 
 #endif

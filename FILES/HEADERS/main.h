@@ -10,9 +10,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <dirent.h>
-#include "../HEADERS/relation.h"
-#include "../HEADERS/batch.h"
-#include "../HEADERS/sort_join.h"
+#include "../HEADERS/threadpool.h"
 
 #define M 50000000
 
