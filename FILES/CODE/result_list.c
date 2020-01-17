@@ -6,39 +6,6 @@
 
 //OTHERS
 
-
-
-uint64_t calculate_relations ( Predicates *pd ) 
-{
-	int used[pd->size];
-	uint64_t count = 0 ;
-	int rel1,rel2; //Here we store the rel origin
-	int flag ;
-
-	for (int i = 0; i < pd->size ; i++ ) 
-	{
-		rel1 = pd->predicates_array[i].rel1_alias;
-		flag = in_used_relation ( used , count , rel1 );  //When flag is 1 that means rel is not already use so we add it to used array
-		if ( flag ) 
-		{
-			used[count] = rel1;
-			count++;
-		}
-		rel2 = pd->predicates_array[i].rel2_alias;
-		if ( rel2 != -1 ) 
-		{
-			flag = in_used_relation ( used , count , rel2);
-			if ( flag ) 
-			{
-				used[count] = rel2;
-				count++;
-			}
-		}
-	}
-
-	return count;
-}
-
 int in_used_relation ( int *array , int count , int rel_no ) {
 
 	for (int i = 0; i < count + 1; i++ ) 

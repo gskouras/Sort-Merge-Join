@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <strings.h>
-#include "../HEADERS/relation.h"
+#include "../HEADERS/query.h"
 #include "../HEADERS/sort_join.h"
 #include "../HEADERS/result_list.h"
 

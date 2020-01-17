@@ -12,7 +12,6 @@
 #include <dirent.h>
 #include "../HEADERS/threadpool.h"
 
-#define M 50000000
 
 
 relation_data *read_data_file(char * );

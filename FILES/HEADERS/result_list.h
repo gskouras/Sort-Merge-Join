@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <strings.h>
-#include "../HEADERS/relation.h"
 #include "../HEADERS/sort_join.h"
 
 //STRUCTS
@@ -27,8 +26,6 @@ typedef struct {
 
 
 //OTHERS
-
-uint64_t calculate_relations ( Predicates * ); //return how many relations we are going to use
 
 int in_used_relation ( int * , int , int ); //Check if already used
 
