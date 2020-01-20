@@ -488,7 +488,7 @@ Between *exec_preds ( Predicates *pd, all_data *datatable , Between *b ) {
 
 
 
-  //printf("\n");
+  printf("\n");
   int psize = pd->size;
   int *cur_array;
   int fflag;

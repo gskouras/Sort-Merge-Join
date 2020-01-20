@@ -76,6 +76,7 @@ void join_threads ( threadpool *thp ) {
     for ( int i = 0 ; i < MAX_THREADS ; i++ ) {
         pthread_join ( thp->threads[i] , NULL ) ;
     }
+    thp->queue->empty = 0;
 }
 
 void *thread_test ( void *args ) {
