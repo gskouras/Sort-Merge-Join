@@ -15,6 +15,7 @@ void execute_all_batches_threads ( char *filename , all_data * datatable , threa
             start_threads ( thp );
             //WAIT FOR ALL THREADS TO FINISH
             join_threads ( thp );
+            pthread_mutex_lock( &thp->thread_join  );
             printf("JOBS NOW %d\n", thp->queue->current_jobs);
             printf("BATCH COMPLETE\n");
             for ( int i = 0 ; i < total_results ; i++ ) {
@@ -73,9 +74,11 @@ void start_threads ( threadpool *thp ) {
 }
 
 void join_threads ( threadpool *thp ) {
+    pthread_mutex_lock( &thp->thread_join );
     for ( int i = 0 ; i < MAX_THREADS ; i++ ) {
         pthread_join ( thp->threads[i] , NULL ) ;
     }
+    pthread_mutex_unlock( &thp->thread_join  );
     thp->queue->empty = 0;
 }
 
@@ -95,6 +98,7 @@ threadpool *threadpool_create ( threadpool *this ) {
     //THEN INIT MUTEXES
 
     if (pthread_mutex_init( &this->get_job , NULL) != 0) {   printf("\n mutex init failed\n"); }
+    if (pthread_mutex_init( &this->thread_join , NULL) != 0) {   printf("\n mutex init failed\n"); }
 
 	return this;
 }

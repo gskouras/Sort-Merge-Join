@@ -22,6 +22,7 @@ typedef struct {
 	char **results;
 	pthread_t threads[MAX_THREADS];
 	pthread_mutex_t get_job;
+	pthread_mutex_t thread_join;
 } threadpool;
 
 
