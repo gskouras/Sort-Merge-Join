@@ -63,7 +63,7 @@ relation_data *read_data_file(char *filename)
 
 	if (fp == NULL)
 	{
-		//printf("File %s doesn't exist. Please try another\n", filename);
+		printf("File %s doesn't exist. Please try another\n", filename);
 		return NULL;
 	}
 
@@ -81,16 +81,16 @@ relation_data *read_data_file(char *filename)
 	}
 
   reldata->numColumns = numofColumns;
-	//printf("\nRelation %s has %ju colums", filename,reldata->numColumns);
+	printf("\nRelation %s has %ju colums", filename,reldata->numColumns);
   reldata->numTuples = numofTuples;
-  //printf(" and each column has %ju tuples\n",reldata->numTuples);
+  printf(" and each column has %ju tuples\n",reldata->numTuples);
 
   
   //Filing the array of tuples with the elemenets of the file.
   char c;
   for(int i=0;i<numofColumns;i++)
   {	
-    //printf("\nColumn %d Statistics:\t",i);
+    printf("\nColumn %d Statistics:\t",i);
     reldata->columns[i]->l = 99999999; //arxikopoihsh se enan megalo arithmo
     reldata->columns[i]->u = 0;
     reldata->columns[i]->f=numofTuples;
@@ -143,7 +143,7 @@ relation_data *read_data_file(char *filename)
           (reldata->columns[i]->d)++;
       }
     
-    //printf("Low: %ju | Upper %ju | Num Values %f | Distinct Values %f \t",reldata->columns[i]->l,reldata->columns[i]->u,reldata->columns[i]->f,reldata->columns[i]->d);
+    printf("Low: %ju | Upper %ju | Num Values %f | Distinct Values %f \t",reldata->columns[i]->l,reldata->columns[i]->u,reldata->columns[i]->f,reldata->columns[i]->d);
   }
   printf("\n");
   return reldata;
