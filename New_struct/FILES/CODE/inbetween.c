@@ -84,7 +84,7 @@ Between *execute_join ( Between *b , int *flags , Predicate *temp_pred , all_dat
 	{
 		printf("SELF JOIN\t");
 	}
-	//relation_print(result);
+
 	b = between_update_result_list ( b , result , rel1_alias , rel2_alias , total_rels );
 	
 	//free(r1);
@@ -302,7 +302,7 @@ int *lesser_filter ( all_data *dt , int *result , Predicate *temp_pred )
 {
 
 	int rel_no = temp_pred->rel1_origin;
-	int col_no = temp_predj->rel1_col;
+	int col_no = temp_pred->rel1_col;
 	uint64_t value =  temp_pred->filter_value;
 
 	uint64_t size = dt->table[rel_no]->numTuples;
