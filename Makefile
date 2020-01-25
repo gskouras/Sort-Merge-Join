@@ -1,5 +1,5 @@
 all: main.o tuple.o relation.o sort_join.o result_list.o job_list.o threadpool.o query.o
-	gcc -o /EXEC/sort_join main.o tuple.o relation.o sort_join.o  result_list.o job_list.o  threadpool.o query.o -g -lm -pthread
+	gcc -o EXEC/sort_join main.o tuple.o relation.o sort_join.o  result_list.o job_list.o  threadpool.o query.o -g -lm -pthread
 
 main.o: FILES/CODE/main.c 
 	gcc -c  FILES/CODE/main.c
