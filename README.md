@@ -17,7 +17,7 @@ make
 #### Εκτέλεση
 
 ```bash
-./EXEC/sort_join
+make run
 ```
 
 

@@ -77,7 +77,7 @@ job_node *job_list_get_job ( job_list *this ) {
 	int flag = 1;
 	job_node *curr_node = this->root;
 	while ( curr_node != NULL ) {
-		if ( !curr_node->used ) {
+		if ( curr_node->used == 0 ) {
 			curr_node->used = 1;
 			flag = 0;
 			return curr_node;
@@ -119,9 +119,10 @@ void job_list_remove_job ( job_list *this , int id , int type ) {
 void job_list_print_jobs  (job_list *this ) {
 	job_node *curr_node = this->root;
 	while ( curr_node != NULL ){
-		printf( "ASD\n");
+		printf("NODE %d \n", curr_node->qjob->predicates->predicates_array[0].rel1_origin);
 		curr_node = curr_node->next;
 	}
+	printf("\n\n");
 }
 
 
