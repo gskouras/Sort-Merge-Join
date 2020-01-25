@@ -1,5 +1,8 @@
 #include "../HEADERS/threadpool.h"
 
+
+#define MAX_THREADS 1
+
 void *thread_execute_job ( void *args ) {
     char *result;
     threadpool *thp = (threadpool *) args;
@@ -17,9 +20,9 @@ void *thread_execute_job ( void *args ) {
                 thp->results[job->qjob->id] = malloc ( strlen ( result ) + 1);
                 strcpy(thp->results[job->qjob->id] , result);
                 //REMOVE JOB
-                //pthread_mutex_lock( &thp->get_job );
+                pthread_mutex_lock( &thp->get_job );
                 job_list_remove_job ( thp->queue , job->qjob->id , job->type);
-                //pthread_mutex_unlock( &thp->get_job );
+                pthread_mutex_unlock( &thp->get_job );
             }
         }
     }
@@ -37,22 +40,22 @@ void execute_all_batches_threads ( char *filename , all_data * datatable , threa
  	while(getline(&line, &len, fp) != -1) {
         if ( strcmp ( line , "F\n") == 0 || strcmp ( line , "F" ) == 0 ) {
 
-            // //GIVE SPACE TO RESULTS ARRAY EQUAL TO THE SIZE OF QUEUE
-            //  total_results = thp->queue->current_jobs;
-            //  thp->results = malloc ( thp->queue->current_jobs * sizeof(char *));
+        //     //GIVE SPACE TO RESULTS ARRAY EQUAL TO THE SIZE OF QUEUE
+             total_results = thp->queue->current_jobs;
+             thp->results = malloc ( thp->queue->current_jobs * sizeof(char *));
 
-            //  start_threads ( thp );
-            //  //WAIT FOR ALL THREADS TO FINISH
-            //  join_threads ( thp );
-            //  job_list_print_jobs ( thp->queue );
-            //  printf("BATCH COMPLETE\n");
-            //  for ( int i = 0 ; i < total_results ; i++ ) {
-            //      printf("%s\n", thp->results[i]);
-            //  }
-            // counter = 0;
+             start_threads ( thp );
+             //WAIT FOR ALL THREADS TO FINISH
+             join_threads ( thp );
+             job_list_print_jobs ( thp->queue );
+             printf("BATCH COMPLETE\n");
+             for ( int i = 0 ; i < total_results ; i++ ) {
+                 printf("%s\n", thp->results[i]);
+             }
+            counter = 0;
 
-            //  free(thp->results);
-        }
+             free(thp->results);
+         }
         else {
     	   thp->queue = parse_line( thp->queue , line , datatable , counter );
            counter++;
@@ -62,15 +65,17 @@ void execute_all_batches_threads ( char *filename , all_data * datatable , threa
 
 
     //SERIAL
-    job_node *curr_node = thp->queue->root;
-    while (curr_node != NULL) {
-        execute_query ( curr_node->qjob->predicates, curr_node->qjob->checksums , curr_node->qjob->datatable);
-        curr_node = curr_node->next;
-    }
+    // job_node *curr_node = thp->queue->root;
+    // while (curr_node != NULL) {
+    //     execute_query ( curr_node->qjob->predicates, curr_node->qjob->checksums , curr_node->qjob->datatable);
+    //     curr_node = curr_node->next;
+    //}
     
     threadpool_destroy ( thp );
 	// Close the file 
-    fclose(fp); 
+    fclose(fp);
+    //}
+
 }
 
 

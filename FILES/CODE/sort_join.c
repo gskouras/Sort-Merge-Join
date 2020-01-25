@@ -21,7 +21,6 @@ void bucket_sort ( relation *rel , int start , int end , int bpos ) {
 			//Create hist for the part of the relation we are checking
 			int *hist = malloc ( 256 * sizeof ( int ) ) ; //Hist is size of 2^8 = 256
 			hist = create_hist ( rel , hist , start , end , bpos ) ; //scan the relation and fill the hist
-			
 			//Check which cells of hist aren't 0 so we can determine the size of psum then fill it according to the given hist
 			int psum_size = get_psumsize( hist ); 
 			int **psum = malloc ( psum_size * sizeof ( int * ) ) ;
@@ -29,16 +28,12 @@ void bucket_sort ( relation *rel , int start , int end , int bpos ) {
 				psum[i] = malloc (2 * sizeof ( int ) ) ;
 			}
 			fill_psum ( psum , hist , psum_size );
-
 			//Now rearrange the part that we work in this recursive level with the help of the empty temp relation
 			relation *temp;
 			temp = relation_create ( temp ) ; //Give space
-
 			rearrange ( rel , temp , start , end , total_tuples , bpos , psum , psum_size ) ;
-
 			//Now for each part of the relation defined by psum we will cal bucket_sort
 			if (psum_size > 1) {
-
 				int i = 0;
 				int curr_start = start ;
 				int curr_end = start + psum[i+1][1] - 1;

@@ -11,9 +11,7 @@
 #include <unistd.h>
 #include "../HEADERS/job_list.h"
 
-
 #define MAX_THREADS 1
-
 
 //STRUCT
 
