@@ -15,7 +15,7 @@ char *execute_query ( Predicates *predicates , Check_sums *check_sums , all_data
     }
 
     //SERIAL/////////////
-    printf("%s\n", line);
+    //printf("%s\n", line);
     /////////////////////
     free(b->jarrays);
     free(b->farrays);
